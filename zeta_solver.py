@@ -15,9 +15,6 @@ emin = tf.e_min
 epsrel = 1e-4
 epsabs = 1e-4
 
-#def A(zeta_m, D):
-#    return 2/np.pi*np.arctan((D/2)/zeta_m)
-
 
 def integrand(e, zeta_m):
         return (tf.dos(e)/np.pi)/(zeta_m**2 + e**2)
@@ -28,15 +25,12 @@ def init_summand(w_n, n, w_m, w_e, D):
             integrand, emin, emax, args=(w_n), limit=100,
             points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs
             )[0]
-#    return tf.lam_odd(w_e, w_m, w_n)*A(w_n, D)
 
 
 def summand(w_n, n, w_m, zeta, w_e, t, D):
     return tf.lam_odd(w_e, w_m, w_n)*zeta[n-1]*itg.quad(
         integrand, emin, emax, args=(zeta[n-1]),
         limit=100, points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
-#    return tf.lam_odd(w_e, w_m, w_n)*A(
-#            zeta[n-1], D)
 
 
 def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
@@ -93,11 +87,10 @@ def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
         old_zeta = np.copy(new_zeta)
         for m in tf.m_array(1, Nc):
             w_m = tf.freq_m(m, t)
-#            new_zeta[m-1] = w_m
             new_zeta[m-1] = (1-damp)*(
-                    w_m + llam/tf.dos(0)*t*np.pi*tf.matsu_sum(1, Nc, t, summand,
-                                                    w_m, old_zeta, w_e, t, D
-                                                    )) + damp*old_zeta[m-1]
+                    w_m + llam/tf.dos(0)*t*np.pi*tf.matsu_sum(
+                        1, Nc, t, summand, w_m, old_zeta, w_e, t, D))
+            + damp*old_zeta[m-1]
         diff_vec.append(tf.f_compare(old_zeta, new_zeta))
 
         if(np.mod(i, maxiter // 5) == 0):

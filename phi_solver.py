@@ -18,15 +18,11 @@ epsrel = 1e-4
 epsabs = 1e-4
 
 
-def A(zeta_m, D):
-    return 2/np.pi*np.arctan(D/2/zeta_m)
-
-
 def tc_root_eqn(
         t, g, w_e, D, phi, dom_lim,
         maxiter=30, damp=0.3):
     Nc = 75
-    zeta,_ = zeta_solver(t, g, w_e, Nc, D)
+    zeta, _ = zeta_solver(t, g, w_e, Nc, D)
     llam = 2*tf.dos(0)*g**2/w_e
     try:
             return np.pi*llam/tf.dos(0)*t*tf.matsu_sum(
@@ -51,10 +47,6 @@ def init_summand(w_n, n, w_m, phi, zeta, w_e, t, D):
         return tf.lam_even(w_e, w_m, w_n)*phi(n, t)*quad(
                 integrand, emin, emax, args=(zeta(w_n),), limit=100,
                 points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
-#    try:
-#        return tf.lam_even(w_e, w_m, w_n)*phi(w_n)/zeta(w_n)*A(zeta(w_n), D)
-#    except TypeError:
-#        return tf.lam_even(w_e, w_m, w_n)*phi(n, t)/zeta(w_n)*A(zeta(w_n), D)
 
 
 def summand(w_n, n, w_m, phi, zeta, w_e, t, D):
@@ -62,7 +54,6 @@ def summand(w_n, n, w_m, phi, zeta, w_e, t, D):
             w_e, w_m, w_n)*phi[n-1]*quad(
         integrand, emin, emax, args=(zeta(w_n),), limit=100,
         points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
-#    return tf.lam_even(w_e, w_m, w_n)*phi[n-1]/zeta(w_n)*A(zeta(w_n), D)
 
 
 def phi_solver(g, w_e, dom_lim, D, init_phi, maxiter=100, p_damp=0.3,
@@ -101,7 +92,7 @@ def phi_solver(g, w_e, dom_lim, D, init_phi, maxiter=100, p_damp=0.3,
         print('Tc/w_e = %5.4g' % (tc/w_e))
 #    print('Converging zeta')
     zeta, zeta_v = zeta_solver(tc, g, w_e, Nc, D, tol=tol, iprint=False)
-
+    init_phi_v = [init_phi(w) for w in tf.freq_array(1, Nc, tc)]
     if iprint:
         plt.figure()
         plt.grid(True)
