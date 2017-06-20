@@ -15,15 +15,12 @@ emin = tf.e_min
 epsrel = 1e-4
 epsabs = 1e-4
 
-#def A(zeta_m, D):
-#    return 2/np.pi*np.arctan((D/2)/zeta_m)
-
 
 def integrand(e, zeta_m):
         return (tf.dos(e)/np.pi)/(zeta_m**2 + e**2)
 
 
-def init_summand(w_n, w_m, w_e, D):
+def init_summand(w_n, n, w_m, w_e, D):
     return tf.lam_odd(w_e, w_m, w_n)*w_n*itg.quad(
             integrand, emin, emax, args=(w_n), limit=100,
             points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs
@@ -31,13 +28,13 @@ def init_summand(w_n, w_m, w_e, D):
 #    return tf.lam_odd(w_e, w_m, w_n)*A(w_n, D)
 
 
-def summand(w_n, w_m, zeta, w_e, t, D):
+def summand(w_n, n, w_m, zeta, w_e, t, D):
     return tf.lam_odd(w_e, w_m, w_n)*zeta[
-                np.int(tf.matsu_index(w_n, t)-1)]*itg.quad(
-        integrand, emin, emax, args=(zeta[np.int(tf.matsu_index(w_n, t)-1)]),
+                np.int(n-1)]*itg.quad(
+        integrand, emin, emax, args=(zeta[np.int(n-1)]),
         limit=100, points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
 #    return tf.lam_odd(w_e, w_m, w_n)*A(
-#            zeta[np.int(tf.matsu_index(w_n, t)-1)], D)
+#            zeta[np.int(n-1)], D)
 
 
 def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
@@ -75,9 +72,8 @@ def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
     # for first loop, use zeta that is equal to w_m
     for m in tf.m_array(1, Nc):
         w_m = tf.freq_m(m, t)
-        new_zeta[m-1] = w_m + llam/tf.dos(0)*t*np.pi*tf.matsu_sum(1, Nc,
-                                                        t, init_summand,
-                                                        w_m, w_e, D)
+        new_zeta[m-1] = w_m + llam/tf.dos(0)*t*np.pi*tf.matsu_sum(
+                        1, Nc, t, init_summand, w_m, w_e, D)
 
     if iprint:
         plt.plot(tf.m_array(1, dom_lim),
@@ -133,7 +129,6 @@ def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
         plt.title('Log difference in iterated fnc. Damping =%2.2f' % damp)
         plt.show()
     zeta = tf.interpolater(tf.freq_array(1, Nc, t), new_zeta)
-    val = tf.freq_m(1, t)
     if diff:
         return zeta, diff_vec,
     else:
