@@ -33,8 +33,6 @@ def tc_calc(g, w_e, D, dom_lim, iprint=False, tol=1e-8, p_damp=0.3,
                                       iprint=iprint, tol=tol, p_tol=p_tol,
                                       t_tol=t_tol
                                       )
-    end = time()
-    print('Runtime: ', end-start)
     if plot:
         llam = 2*tf.dos(0)*g**2/w_e
         plt.figure(num=None, figsize=(6, 8), dpi=150,
@@ -58,5 +56,7 @@ def tc_calc(g, w_e, D, dom_lim, iprint=False, tol=1e-8, p_damp=0.3,
         print('lambda = %g\n*********************' % llam)
         print('dom_lim = %i' % dom_lim)
         print('Converged tc/w_e: %3.2g' % (tc/w_e))
+        end = time()
+        print('\nRuntime: ', end-start)
 
     return tc

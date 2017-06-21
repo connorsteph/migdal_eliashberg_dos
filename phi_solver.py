@@ -39,20 +39,14 @@ def init_summand(w_n, n, w_m, phi, zeta, w_e, t, D):
                     integrand, emin, emax, args=(zeta(w_n),), limit=100,
                     points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
     except TypeError:
-        return tf.lam_even(w_e, w_m, w_n)*phi(w_n)*quad(
+        return tf.lam_even(w_e, w_m, w_n)*phi[n-1]*quad(
                     integrand, emin, emax, args=(zeta[n-1],), limit=100,
                     points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
 
 
 def summand(w_n, n, w_m, phi, zeta, w_e, t, D):
-    try:
-        return tf.lam_even(
-                w_e, w_m, w_n)*phi[n-1]*quad(
-            integrand, emin, emax, args=(zeta(w_n),), limit=100,
-            points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
-    except TypeError:
-        return tf.lam_even(
-                w_e, w_m, w_n)*phi[n-1]*quad(
+    return tf.lam_even(
+            w_e, w_m, w_n)*phi[n-1]*quad(
             integrand, emin, emax, args=(zeta[n-1],), limit=100,
             points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
 
@@ -99,23 +93,16 @@ def phi_solver(g, w_e, dom_lim, D, init_phi, maxiter=100, p_damp=0.3,
         plt.grid(True)
         plt.ylim([0, 1])
         plt.xlabel('w_m')
-        try:
-            plt.plot([w/w_e for w in tf.freq_array(1, dom_lim, tc)],
-                     [init_phi(w)/init_phi(tf.freq_m(1, tc))
-                     for w in tf.freq_array(1, dom_lim, tc)],
-                     label='initial')
-        except TypeError:
-            plt.plot([w/w_e for w in tf.freq_array(1, dom_lim, tc)],
-                     [init_phi(w, tc)/init_phi(tf.freq_m(1, tc), tc)
-                     for w in tf.freq_array(1, dom_lim, tc)],
-                     label='initial')
+        plt.plot([w/w_e for w in tf.freq_array(1, dom_lim, tc)],
+                 [init_phi_v[i]/init_phi_v[0]
+                 for i in tf.m_array(1, dom_lim)], label='initial')
 
 #    print('iterating initial phi')
     for m in tf.m_array(1, Nc):
         w_m = tf.freq_m(m, tc)
         new_phi[m-1] = llam/tf.dos(0)*tc*np.pi*tf.matsu_sum(
                     1, Nc, tc, init_summand,
-                    w_m, init_phi, zeta_v, w_e, tc, D)
+                    w_m, init_phi_v, zeta_v, w_e, tc, D)
         new_phi = np.copy([new_phi[i]/new_phi[0]
                           for i in range(Nc)])
 
