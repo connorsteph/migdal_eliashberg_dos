@@ -18,24 +18,15 @@ epsrel = 1e-4
 epsabs = 1e-4
 
 
-def A(zeta_m, D):
-    return 2/np.pi*np.arctan(D/2/zeta_m)
-
-
 def tc_root_eqn(
         t, g, w_e, D, phi, dom_lim,
         maxiter=30, damp=0.3):
-    Nc = 75
-    zeta,_ = zeta_solver(t, g, w_e, Nc, D)
+    Nc = 20
+    zeta, _ = zeta_solver(t, g, w_e, Nc, D)
     llam = 2*tf.dos(0)*g**2/w_e
-    try:
-            return np.pi*llam/tf.dos(0)*t*tf.matsu_sum(
+    return np.pi*llam/tf.dos(0)*t*tf.matsu_sum(
                     1, Nc, t, init_summand, tf.freq_m(1, t), phi, zeta, w_e,
                     t, D) - phi(tf.freq_m(1, t))
-    except TypeError:
-            return np.pi*llam/tf.dos(0)*t*tf.matsu_sum(
-                    1, Nc, t, init_summand, tf.freq_m(1, t), phi, zeta,
-                    w_e, t, D) - phi(1, t)
 
 
 def integrand(e, zeta_n,):
@@ -43,18 +34,9 @@ def integrand(e, zeta_n,):
 
 
 def init_summand(w_n, n, w_m, phi, zeta, w_e, t, D):
-    try:
-        return tf.lam_even(w_e, w_m, w_n)*phi(w_n)*quad(
+    return tf.lam_even(w_e, w_m, w_n)*phi(w_n)*quad(
                 integrand, emin, emax, args=(zeta(w_n),), limit=100,
                 points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
-    except TypeError:
-        return tf.lam_even(w_e, w_m, w_n)*phi(n, t)*quad(
-                integrand, emin, emax, args=(zeta(w_n),), limit=100,
-                points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
-#    try:
-#        return tf.lam_even(w_e, w_m, w_n)*phi(w_n)/zeta(w_n)*A(zeta(w_n), D)
-#    except TypeError:
-#        return tf.lam_even(w_e, w_m, w_n)*phi(n, t)/zeta(w_n)*A(zeta(w_n), D)
 
 
 def summand(w_n, n, w_m, phi, zeta, w_e, t, D):
@@ -62,7 +44,6 @@ def summand(w_n, n, w_m, phi, zeta, w_e, t, D):
             w_e, w_m, w_n)*phi[n-1]*quad(
         integrand, emin, emax, args=(zeta(w_n),), limit=100,
         points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
-#    return tf.lam_even(w_e, w_m, w_n)*phi[n-1]/zeta(w_n)*A(zeta(w_n), D)
 
 
 def phi_solver(g, w_e, dom_lim, D, init_phi, maxiter=100, p_damp=0.3,
