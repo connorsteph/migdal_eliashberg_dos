@@ -160,14 +160,6 @@ def m_array(lower, upper):
     return range(lower, upper+1, 1)
 
 
-def sig0(lower, upper, t, w_e, mu):
-    """
-    Samples sig0 over a range of wm, with m from lower to upper, at temp t.
-    """
-    return [integral.quad(s0, e_min, e_max, args=(w, t, w_e, mu))[0]
-            for w in freq_array(lower, upper, t)]
-
-
 def f_compare(v1, v2):
     """
     returns the average absolute value of the difference between

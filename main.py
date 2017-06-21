@@ -7,7 +7,6 @@ Created on Fri Jun 16 11:40:00 2017
 
 import numpy as np
 from tc_calc import tc_calc
-import matplotlib.pyplot as plt
 import tc_func as tf
 emin = tf.e_min
 emax = tf.e_max

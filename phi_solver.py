@@ -18,24 +18,15 @@ epsrel = 1e-4
 epsabs = 1e-4
 
 
-def A(zeta_m, D):
-    return 2/np.pi*np.arctan(D/2/zeta_m)
-
-
 def tc_root_eqn(
         t, g, w_e, D, phi, dom_lim,
         maxiter=30, damp=0.3):
-    Nc = 75
-    zeta,_ = zeta_solver(t, g, w_e, Nc, D)
+    Nc = 20
+    zeta, _ = zeta_solver(t, g, w_e, Nc, D)
     llam = 2*tf.dos(0)*g**2/w_e
-    try:
-            return np.pi*llam/tf.dos(0)*t*tf.matsu_sum(
+    return np.pi*llam/tf.dos(0)*t*tf.matsu_sum(
                     1, Nc, t, init_summand, tf.freq_m(1, t), phi, zeta, w_e,
                     t, D) - phi(tf.freq_m(1, t))
-    except TypeError:
-            return np.pi*llam/tf.dos(0)*t*tf.matsu_sum(
-                    1, Nc, t, init_summand, tf.freq_m(1, t), phi, zeta,
-                    w_e, t, D) - phi(1, t)
 
 
 def integrand(e, zeta_n,):
@@ -45,24 +36,19 @@ def integrand(e, zeta_n,):
 def init_summand(w_n, n, w_m, phi, zeta, w_e, t, D):
     try:
         return tf.lam_even(w_e, w_m, w_n)*phi(w_n)*quad(
-                integrand, emin, emax, args=(zeta(w_n),), limit=100,
-                points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
+                    integrand, emin, emax, args=(zeta(w_n),), limit=100,
+                    points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
     except TypeError:
-        return tf.lam_even(w_e, w_m, w_n)*phi(n, t)*quad(
-                integrand, emin, emax, args=(zeta(w_n),), limit=100,
-                points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
-#    try:
-#        return tf.lam_even(w_e, w_m, w_n)*phi(w_n)/zeta(w_n)*A(zeta(w_n), D)
-#    except TypeError:
-#        return tf.lam_even(w_e, w_m, w_n)*phi(n, t)/zeta(w_n)*A(zeta(w_n), D)
+        return tf.lam_even(w_e, w_m, w_n)*phi[n-1]*quad(
+                    integrand, emin, emax, args=(zeta[n-1],), limit=100,
+                    points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
 
 
 def summand(w_n, n, w_m, phi, zeta, w_e, t, D):
     return tf.lam_even(
             w_e, w_m, w_n)*phi[n-1]*quad(
-        integrand, emin, emax, args=(zeta(w_n),), limit=100,
-        points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
-#    return tf.lam_even(w_e, w_m, w_n)*phi[n-1]/zeta(w_n)*A(zeta(w_n), D)
+            integrand, emin, emax, args=(zeta[n-1],), limit=100,
+            points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
 
 
 def phi_solver(g, w_e, dom_lim, D, init_phi, maxiter=100, p_damp=0.3,
@@ -101,29 +87,22 @@ def phi_solver(g, w_e, dom_lim, D, init_phi, maxiter=100, p_damp=0.3,
         print('Tc/w_e = %5.4g' % (tc/w_e))
 #    print('Converging zeta')
     zeta, zeta_v = zeta_solver(tc, g, w_e, Nc, D, tol=tol, iprint=False)
-
+    init_phi_v = [init_phi(w) for w in tf.freq_array(1, Nc, tc)]
     if iprint:
         plt.figure()
         plt.grid(True)
         plt.ylim([0, 1])
         plt.xlabel('w_m')
-        try:
-            plt.plot([w/w_e for w in tf.freq_array(1, dom_lim, tc)],
-                     [init_phi(w)/init_phi(tf.freq_m(1, tc))
-                     for w in tf.freq_array(1, dom_lim, tc)],
-                     label='initial')
-        except TypeError:
-            plt.plot([w/w_e for w in tf.freq_array(1, dom_lim, tc)],
-                     [init_phi(w, tc)/init_phi(tf.freq_m(1, tc), tc)
-                     for w in tf.freq_array(1, dom_lim, tc)],
-                     label='initial')
+        plt.plot([w/w_e for w in tf.freq_array(1, dom_lim, tc)],
+                 [init_phi_v[i]/init_phi_v[0]
+                 for i in tf.m_array(1, dom_lim)], label='initial')
 
 #    print('iterating initial phi')
     for m in tf.m_array(1, Nc):
         w_m = tf.freq_m(m, tc)
         new_phi[m-1] = llam/tf.dos(0)*tc*np.pi*tf.matsu_sum(
                     1, Nc, tc, init_summand,
-                    w_m, init_phi, zeta, w_e, tc, D)
+                    w_m, init_phi_v, zeta_v, w_e, tc, D)
         new_phi = np.copy([new_phi[i]/new_phi[0]
                           for i in range(Nc)])
 
@@ -134,7 +113,7 @@ def phi_solver(g, w_e, dom_lim, D, init_phi, maxiter=100, p_damp=0.3,
             w_m = tf.freq_m(m, tc)
             new_phi[m-1] = (1-p_damp)*llam/tf.dos(0)*tc*np.pi*tf.matsu_sum(
                                 1, Nc, tc,
-                                summand, w_m, old_phi, zeta, w_e, tc, D
+                                summand, w_m, old_phi, zeta_v, w_e, tc, D
                                 )+p_damp*old_phi[m-1]
         new_phi = np.copy([new_phi[i]/new_phi[0] for i in range(Nc)])
         diff_vec.append(tf.f_compare(old_phi, new_phi))

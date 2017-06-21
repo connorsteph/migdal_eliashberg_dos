@@ -4,13 +4,10 @@ Created on Fri Jun  2 15:08:35 2017
 @author: Connor
 """
 
-import numpy as np
 from matplotlib import pyplot as plt
 from time import time
 import tc_func as tf
-from zeta_solver import zeta_solver
 from phi_solver import phi_solver
-from phi_solver import init_summand
 """
 Pseudo Code:
 *************************
@@ -24,8 +21,8 @@ Pseudo Code:
 """
 
 
-def init_phi(n, t):
-    return 1/tf.freq_m(n, t)
+def init_phi(w):
+    return 1/w
 
 
 def tc_calc(g, w_e, D, dom_lim, iprint=False, tol=1e-8, p_damp=0.3,
@@ -36,8 +33,6 @@ def tc_calc(g, w_e, D, dom_lim, iprint=False, tol=1e-8, p_damp=0.3,
                                       iprint=iprint, tol=tol, p_tol=p_tol,
                                       t_tol=t_tol
                                       )
-    end = time()
-    print('Runtime: ', end-start)
     if plot:
         llam = 2*tf.dos(0)*g**2/w_e
         plt.figure(num=None, figsize=(6, 8), dpi=150,
@@ -52,7 +47,7 @@ def tc_calc(g, w_e, D, dom_lim, iprint=False, tol=1e-8, p_damp=0.3,
         plt.xlabel(r'$\frac{\omega_m}{\omega_E}$', fontsize=18)
         plt.title(r'$\phi$ for $T_c$ = %5.4g $\omega_E$' % (tc/w_e),
                   fontsize=22)
-        plt.savefig('./phi_plots/phi_tc_lam_%g_we_%g.pdf'
+        plt.savefig('phi_tc_lam_%g_we_%g.pdf'
                     % (llam, w_e),
                     bbox_inches='tight')
         plt.show()
@@ -61,5 +56,7 @@ def tc_calc(g, w_e, D, dom_lim, iprint=False, tol=1e-8, p_damp=0.3,
         print('lambda = %g\n*********************' % llam)
         print('dom_lim = %i' % dom_lim)
         print('Converged tc/w_e: %3.2g' % (tc/w_e))
+        end = time()
+        print('\nRuntime: ', end-start)
 
     return tc
