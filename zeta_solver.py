@@ -9,6 +9,8 @@ import numpy as np
 import scipy.integrate as itg
 import matplotlib.pyplot as plt
 import tc_func as tf
+from time import time
+import zeta_sum
 emax = tf.e_max
 emin = tf.e_min
 
@@ -36,8 +38,7 @@ def summand(w_n, n, w_m, zeta, w_e, t, D):
 def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
                 tol=1e-3, iprint=False, damp=0.3):
     # n takes the place of m'
-
-    llam = 2*tf.dos(0)*g**2/(w_e)
+#    llam = 2*tf.dos(0)*g**2/(w_e)
 
 #    print('*********************\ng: %g, w_e: %g, D: %g' % (g, w_e, D))
 #    print('lambda = %g' % llam)
@@ -55,22 +56,15 @@ def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
     index i of new_zeta is equal to new_zeta evaluated at m=i+1
     """
     Nc = dom_lim + 30
-
     if iprint:
         plt.figure()
         plt.grid(True)
         plt.plot(tf.m_array(1, dom_lim), tf.freq_array(
                 1, dom_lim, t), '.', markersize='2')
-
     diff_vec = []
     new_zeta = np.zeros(Nc)
-    # constant DOS, using band of -D/2,D/2
-    # for first loop, use zeta that is equal to w_m
-    for m in tf.m_array(1, Nc):
-        w_m = tf.freq_m(m, t)
-        new_zeta[m-1] = w_m + llam/tf.dos(0)*t*np.pi*tf.matsu_sum(
-                1, Nc, t, init_summand, w_m, w_e, D)
-
+    new_zeta = zeta_sum.zeta_init(t, g, w_e, [1/(emax-emin) for i in range(tf.nee)],
+                                              tf.dee, emin, emax, Nc, tf.nee)
     if iprint:
         plt.plot(tf.m_array(1, dom_lim),
                  new_zeta[:dom_lim], '--', label='it 0')
@@ -84,13 +78,9 @@ def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
 
     for i in range(1, maxiter+1):
         old_zeta = np.copy(new_zeta)
-        for m in tf.m_array(1, Nc):
-            w_m = tf.freq_m(m, t)
-#            new_zeta[m-1] = w_m
-            new_zeta[m-1] = (1-damp)*(
-                    w_m + llam/tf.dos(0)*t*np.pi*tf.matsu_sum(
-                            1, Nc, t, summand, w_m, old_zeta, w_e, t, D
-                            )) + damp*old_zeta[m-1]
+        new_zeta = zeta_sum.zeta(
+                t, g, w_e, [1/(emax-emin) for i in range(tf.nee)],
+                            tf.dee, emin, emax, old_zeta, damp, Nc, tf.nee)
         diff_vec.append(tf.f_compare(old_zeta, new_zeta))
 
         if(np.mod(i, maxiter // 5) == 0):

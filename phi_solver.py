@@ -10,6 +10,7 @@ from scipy.integrate import quad
 from matplotlib import pyplot as plt
 from scipy.optimize import brentq
 import tc_func as tf
+from time import time
 from zeta_solver import zeta_solver
 
 emax = tf.e_max
@@ -19,9 +20,8 @@ epsabs = 1e-4
 
 
 def tc_root_eqn(
-        t, g, w_e, D, phi, dom_lim,
-        maxiter=30, damp=0.3):
-    Nc = 20
+        t, g, w_e, D, phi, dom_lim):
+    Nc = 25
     zeta, _ = zeta_solver(t, g, w_e, Nc, D)
     llam = 2*tf.dos(0)*g**2/w_e
     return np.pi*llam/tf.dos(0)*t*tf.matsu_sum(
@@ -68,21 +68,25 @@ def phi_solver(g, w_e, dom_lim, D, init_phi, maxiter=100, p_damp=0.3,
     new_phi = np.zeros(Nc)
 
     if tc is None:
+        start = time()
         if iprint:
             print('Solving for initial tc')
-#            plt.figure()
-#            plt.grid(True)
-#            num = 11
-#            t_domain = np.linspace(l_root, w_e, num)
-#            y = np.zeros(num)
-#            for c, t in enumerate(t_domain, 0):
-#                y[c] = (tc_root_eqn(t, g, w_e, D, init_phi, dom_lim))
-#            plt.plot(t_domain, y, 'o-')
-#            plt.xlim([0, w_e])
-#            plt.xlabel('t')
-#            plt.show()
-            tc = brentq(tc_root_eqn, l_root, w_e, args=(
-                g, w_e, D, init_phi, dom_lim))
+            plt.figure()
+            plt.grid(True)
+            num = 11
+            t_domain = np.linspace(l_root, w_e, num)
+            y = np.zeros(num)
+            for c, t in enumerate(t_domain, 0):
+                y[c] = (tc_root_eqn(t, g, w_e, D, init_phi, dom_lim))
+            plt.plot(t_domain, y, 'o-')
+            plt.xlim([0, w_e])
+            plt.xlabel('t')
+            plt.show()
+        tc = brentq(tc_root_eqn, l_root, w_e, args=(
+            g, w_e, D, init_phi, dom_lim))
+        end = time()
+        print('Runtime = %g' % (end - start))
+
     if iprint:
         print('Tc/w_e = %5.4g' % (tc/w_e))
 #    print('Converging zeta')

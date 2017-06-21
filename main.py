@@ -8,6 +8,7 @@ Created on Fri Jun 16 11:40:00 2017
 import numpy as np
 from tc_calc import tc_calc
 import tc_func as tf
+
 emin = tf.e_min
 emax = tf.e_max
 """
@@ -44,6 +45,8 @@ damp = 0.3
 tc_calc(g, w_e, D,
         dom_lim, maxiter=maxiter,
         tol=tol, p_tol=5e-5, t_tol=5e-2, plot=True, iprint=True)
+
+
 
 #num = 100
 #llam = 2*g**2/(D*w_e)
