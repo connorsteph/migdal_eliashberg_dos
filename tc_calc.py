@@ -3,11 +3,14 @@
 Created on Fri Jun  2 15:08:35 2017
 @author: Connor
 """
+
+import numpy as np
 from matplotlib import pyplot as plt
 from time import time
 import tc_func as tf
+from zeta_solver import zeta_solver
 from phi_solver import phi_solver
-
+from phi_solver import init_summand
 """
 Pseudo Code:
 *************************
@@ -49,7 +52,7 @@ def tc_calc(g, w_e, D, dom_lim, iprint=False, tol=1e-8, p_damp=0.3,
         plt.xlabel(r'$\frac{\omega_m}{\omega_E}$', fontsize=18)
         plt.title(r'$\phi$ for $T_c$ = %5.4g $\omega_E$' % (tc/w_e),
                   fontsize=22)
-        plt.savefig('phi_tc_lam_%g_we_%g.pdf'
+        plt.savefig('./phi_plots/phi_tc_lam_%g_we_%g.pdf'
                     % (llam, w_e),
                     bbox_inches='tight')
         plt.show()
