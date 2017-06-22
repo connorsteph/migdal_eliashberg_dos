@@ -114,5 +114,5 @@ def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
         plt.ylabel('Log Diff')
         plt.title('Log difference in iterated fnc. Damping =%2.2f' % damp)
         plt.show()
-    zeta = tf.interpolater(tf.freq_array(1, Nc, t), new_zeta)
-    return zeta, new_zeta
+    zeta = tf.interpolater(tf.freq_array(1, dom_lim, t), new_zeta[:dom_lim])
+    return zeta, new_zeta[:dom_lim]

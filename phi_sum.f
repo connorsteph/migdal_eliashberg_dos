@@ -1,5 +1,5 @@
-      subroutine phi(t, g, w_e, dos,
-     -     dee, emin, emax, new_phi, old_phi, zeta, p_damp, nc, nee)
+      subroutine phi(t, g, w_e, dee, emin, emax, p_damp,
+     -     new_phi, old_phi, zeta, dos, nc, nee)
       implicit none
       real*8, intent(in) :: t, g, w_e, dee, emin, emax, p_damp
       integer, intent(in) :: nc, nee
@@ -14,9 +14,9 @@
       lambda = 2*dos_mu*g**2/w_e
       do j = 0,nc-1
          w_m = pi*t*(2*(j+1)-1)
-         call phi_sum(t, g, w_e, w_m, dos, dee,
-     - emin, emax, old_phi, matsu_sum, nc, nee)
-         new_phi(j) = (1-p_damp)*(w_m + lambda/dos_mu*t*pi*matsu_sum)
+         call phi_sum(t, g, w_e, w_m, dee,
+     - emin, emax, matsu_sum, old_phi, zeta, dos, nc, nee)
+         new_phi(j) = (1-p_damp)*(lambda/dos_mu*t*pi*matsu_sum)
      -        + p_damp*old_phi(j)
       end do
       do j = 0,nc-1
@@ -24,8 +24,8 @@
       end do
       end subroutine
       
-      subroutine phi_init(t, g, w_e, dos,
-     -     dee, emin, emax, new_phi, init_phi, zeta, nc, nee)
+      subroutine phi_init(t, g, w_e, dee, emin, emax,
+     -     init_phi, zeta, dos, new_phi, nc, nee)
       implicit none
       real*8, intent(in) :: t, g, w_e, dee, emin, emax
       integer, intent(in) :: nc, nee
@@ -40,8 +40,8 @@
       lambda = 2*dos_mu*g**2/w_e
       do j = 0,nc-1
          w_m = pi*t*(2*(j+1)-1)
-         call phi_sum_init(t, g, w_e, w_m, dos, dee,
-     - emin, emax, matsu_sum, nc, nee)
+         call phi_sum_init(t, g, w_e, w_m, dee,
+     - emin, emax, matsu_sum, init_phi, zeta, dos, nc, nee)
          new_phi(j) = lambda/dos_mu*t*pi*matsu_sum
       end do
       do j = 0,nc-1
@@ -49,19 +49,19 @@
       end do
       end subroutine
       
-      subroutine phi_sum(t, g, w_e, w_m, dos, dee,
-     - emin, emax, old_phi, zeta, ssum, nc, nee)
+      subroutine phi_sum(t, g, w_e, w_m, dee,
+     - emin, emax, matsu_sum, old_phi, zeta, dos, nc, nee)
       implicit none
       real*8, intent(in) :: t, g, w_e, w_m, dee, emin, emax
       integer, intent(in) :: nc, nee
       real*8, intent(in) :: old_phi(0:nc-1), zeta(0:nc-1)
       real*8, intent(in) :: dos(0:nee-1)       
-      real*8, intent(out) :: ssum
+      real*8, intent(out) :: matsu_sum
       real*8 :: w_n, integral, w_e2, lam_even
       integer :: n
       external :: quad
       real*8, parameter :: pi = 3.1415926535897
-      ssum = 0.0d0
+      matsu_sum = 0.0d0
       w_e2 = w_e*w_e
       do n = 0,nc-1
          integral = 0.0d0
@@ -70,7 +70,7 @@
      -        +1/(w_e2+(w_m+w_n)**2))
          call quad(dos, emin, emax, dee, zeta(n),
      -        w_e, integral, nee)
-         ssum = ssum + lam_even*old_phi(n)*integral
+         matsu_sum = matsu_sum + lam_even*old_phi(n)*integral
       end do
       end subroutine
 
@@ -91,19 +91,19 @@
       end do
       end subroutine
 
-      subroutine phi_sum_init(t, g, w_e, w_m, dos, dee,
-     - emin, emax, init_phi, zeta, ssum, nc, nee)
+      subroutine phi_sum_init(t, g, w_e, w_m, dee,
+     - emin, emax, matsu_sum, init_phi, zeta, dos, nc, nee)
       implicit none
       real*8, intent(in) :: t, g, w_e, w_m, dee, emin, emax
       integer, intent(in) :: nc, nee
       real*8, intent(in) :: dos(0:nee-1)
       real*8, intent(in) :: init_phi(0:nc-1), zeta(0:nc-1)
-      real*8, intent(out) :: ssum
+      real*8, intent(out) :: matsu_sum
       real*8 :: w_n, integral, w_e2, lam_even
       integer :: n
       external :: quad_init
       real*8, parameter :: pi = 3.1415926535897
-      ssum = 0.0d0
+      matsu_sum = 0.0d0
       w_e2 = w_e*w_e
       do n = 0,nc-1
          integral = 0.0d0
@@ -112,7 +112,7 @@
      -        +1/(w_e2+(w_m+w_n)**2))
          call quad_init(dos, emin, emax, dee, zeta(n),
      -        w_e, integral, nee)
-         ssum = ssum + lam_even*init_phi(n)*integral
+         matsu_sum = matsu_sum + lam_even*init_phi(n)*integral
       end do
       end subroutine
 
