@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 from time import time
 import tc_func as tf
 from phi_solver import phi_solver
+from numpy import int
 """
 Pseudo Code:
 *************************
@@ -34,7 +35,7 @@ def tc_calc(g, w_e, D, dom_lim, iprint=False, tol=1e-8, p_damp=0.3,
                                       t_tol=t_tol
                                       )
     if plot:
-        llam = 2*tf.dos(0)*g**2/w_e
+        llam = 2*tf.dos[int(tf.nee/2 + 1)]*g**2/w_e
         plt.figure(num=None, figsize=(6, 8), dpi=150,
                    facecolor='w', edgecolor='k')
         plt.grid(True)

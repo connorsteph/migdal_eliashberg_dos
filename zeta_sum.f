@@ -10,12 +10,12 @@
       real*8, parameter :: pi = 3.1415926535897
       real*8 :: matsu_sum, dos_mu, lambda, w_m
       external :: zeta_sum
-      dos_mu = dos(nee/2)
+      dos_mu = dos(nint(nee/2.0d0))
       lambda = 2*dos_mu*g**2/w_e
       do j = 0,nc-1
          w_m = pi*t*(2*(j+1)-1)
          call zeta_sum(t, g, w_e, w_m, dos, dee,
-     - emin, emax, old_zeta, matsu_sum, nc, nee)
+     -        emin, emax, old_zeta, matsu_sum, nc, nee)
          new_zeta(j) = (1-damp)*(w_m + lambda/dos_mu*t*pi*matsu_sum)
      -        + damp*old_zeta(j)
       end do
@@ -32,12 +32,12 @@
       real*8, parameter :: pi = 3.1415926535897
       real*8 :: matsu_sum, lambda, dos_mu, w_m
       external :: zeta_sum_init
-      dos_mu = dos(nee/2)
+      dos_mu = dos(nint(nee/2.0d0))
       lambda = 2*dos_mu*g**2/w_e
       do j = 0,nc-1
          w_m = pi*t*(2*(j+1)-1)
          call zeta_sum_init(t, g, w_e, w_m, dos, dee,
-     - emin, emax, matsu_sum, nc, nee)
+     -        emin, emax, matsu_sum, nc, nee)
          new_zeta(j) = w_m + lambda/dos_mu*t*pi*matsu_sum
       end do
       end subroutine

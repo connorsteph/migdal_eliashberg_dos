@@ -9,13 +9,13 @@ import numpy as np
 import scipy.integrate as itg
 import matplotlib.pyplot as plt
 import tc_func as tf
-from time import time
 import zeta_sum
 emax = tf.e_max
 emin = tf.e_min
 
 epsrel = 1e-4
 epsabs = 1e-4
+dos = tf.dos
 
 
 def integrand(e, zeta_m):
@@ -61,15 +61,15 @@ def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
         plt.grid(True)
         plt.plot(tf.m_array(1, dom_lim), tf.freq_array(
                 1, dom_lim, t), '.', markersize='2')
-    diff_vec = []
+    diff_vec = np.empty(maxiter+1)
     new_zeta = np.zeros(Nc)
-    new_zeta = zeta_sum.zeta_init(t, g, w_e, [1/(emax-emin) for i in range(tf.nee)],
+    new_zeta = zeta_sum.zeta_init(t, g, w_e, dos,
                                               tf.dee, emin, emax, Nc, tf.nee)
     if iprint:
         plt.plot(tf.m_array(1, dom_lim),
                  new_zeta[:dom_lim], '--', label='it 0')
 
-    diff_vec.append(tf.f_compare(tf.freq_array(1, Nc, t), new_zeta))
+    diff_vec[0] = (tf.f_compare(tf.freq_array(1, Nc, t), new_zeta))
 
     """
     we now have a zeta function for the RHS, so we continue to iterate
@@ -77,11 +77,10 @@ def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
     """
 
     for i in range(1, maxiter+1):
-        old_zeta = np.copy(new_zeta)
+        old_zeta = new_zeta
         new_zeta = zeta_sum.zeta(
-                t, g, w_e, [1/(emax-emin) for i in range(tf.nee)],
-                            tf.dee, emin, emax, old_zeta, damp, Nc, tf.nee)
-        diff_vec.append(tf.f_compare(old_zeta, new_zeta))
+                t, g, w_e, dos, tf.dee, emin, emax, old_zeta, damp, Nc, tf.nee)
+        diff_vec[i] = (tf.f_compare(old_zeta, new_zeta))
 
         if(np.mod(i, maxiter // 5) == 0):
             if iprint:
@@ -93,6 +92,7 @@ def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
                 print('zeta converged to tol in %i iterations' % i)
                 plt.plot(tf.m_array(1, dom_lim), new_zeta[:dom_lim], '-.',
                          label='it %i' % i)
+                diff_vec = diff_vec[:i+1]
             break
         if i == maxiter:
             print('Zeta did not converge in %i iterations' % i,

@@ -10,7 +10,6 @@ from scipy.integrate import quad
 from matplotlib import pyplot as plt
 from scipy.optimize import brentq
 import tc_func as tf
-from time import time
 from zeta_solver import zeta_solver
 import phi_sum
 
@@ -18,20 +17,21 @@ emax = tf.e_max
 emin = tf.e_min
 epsrel = 1e-4
 epsabs = 1e-4
+dos = tf.dos
 
 
 def tc_root_eqn(
         t, g, w_e, D, phi, dom_lim):
-    Nc = 25
+    Nc = 60
     zeta, zeta_v = zeta_solver(t, g, w_e, Nc, D)
-    llam = 2*tf.dos(0)*g**2/w_e
+    llam = 2*tf.dos[np.int(tf.nee/2 + 1)]*g**2/w_e
 #    return np.pi*llam/tf.dos(0)*t*tf.matsu_sum(
 #                    1, Nc, t, init_summand, tf.freq_m(1, t), phi, zeta, w_e,
 #                    t, D) - phi(tf.freq_m(1, t))
     phi_v = [phi(w) for w in tf.freq_array(1, Nc, t)]
-    return np.pi*llam/tf.dos(0)*t*phi_sum.phi_sum_init(
+    return np.pi*llam/tf.dos[np.int(tf.nee/2+1)]*t*phi_sum.phi_sum_init(
                 t, g, w_e, tf.freq_m(1, t), tf.dee, emin, emax, phi_v, zeta_v,
-                [1/(emax-emin) for i in range(tf.nee)], Nc, tf.nee) - phi_v[0]
+                dos, Nc, tf.nee) - phi_v[0]
 
 
 
@@ -62,8 +62,6 @@ def phi_solver(g, w_e, dom_lim, D, init_phi, maxiter=100, p_damp=0.3,
                t_tol=5e-2, tc=None,
                ):
     l_root = 0.01*w_e
-    llam = 2*tf.dos(0)*g**2/(w_e)
-
 #    print('*********************\ng: %g, w_e: %g, D: %g' % (g, w_e, D))
 #    print('lambda = %g\n*********************' % llam)
 #
@@ -72,31 +70,28 @@ def phi_solver(g, w_e, dom_lim, D, init_phi, maxiter=100, p_damp=0.3,
     diff_vec = []
     Nc = dom_lim + 25
     new_phi = np.zeros(Nc)
+#    llam = 2*tf.dos(0)*g**2/w_e
 
     if tc is None:
-        start = time()
         if iprint:
             print('Solving for initial tc')
-#            plt.figure()
-#            plt.grid(True)
-#            num = 11
-#            t_domain = np.linspace(l_root, w_e, num)
-#            y = np.zeros(num)
-#            for c, t in enumerate(t_domain, 0):
-#                y[c] = (tc_root_eqn(t, g, w_e, D, init_phi, dom_lim))
-#            plt.plot(t_domain, y, 'o-')
-#            plt.xlim([0, w_e])
-#            plt.xlabel('t')
-#            plt.show()
+            plt.figure()
+            plt.grid(True)
+            num = 11
+            t_domain = np.linspace(l_root, w_e, num)
+            y = np.zeros(num)
+            for c, t in enumerate(t_domain, 0):
+                y[c] = (tc_root_eqn(t, g, w_e, D, init_phi, dom_lim))
+            plt.plot(t_domain, y, 'o-')
+            plt.xlim([0, w_e])
+            plt.xlabel('t')
+            plt.show()
         tc = brentq(tc_root_eqn, l_root, w_e, args=(
             g, w_e, D, init_phi, dom_lim))
-        end = time()
-        print('Runtime = %g' % (end - start))
-
     if iprint:
         print('Tc/w_e = %5.4g' % (tc/w_e))
 #    print('Converging zeta')
-    zeta_v = zeta_solver(tc, g, w_e, Nc, D, tol=tol, iprint=False)[1]
+    zeta, zeta_v = zeta_solver(tc, g, w_e, Nc, D, tol=tol, iprint=False)
     init_phi_v = [init_phi(w) for w in tf.freq_array(1, Nc, tc)]
     if iprint:
         plt.figure()
@@ -107,33 +102,30 @@ def phi_solver(g, w_e, dom_lim, D, init_phi, maxiter=100, p_damp=0.3,
                  [init_phi_v[i]/init_phi_v[0]
                  for i in tf.m_array(1, dom_lim)], label='initial')
 
-#    print('iterating initial phi')
-    for m in tf.m_array(1, Nc):
-        w_m = tf.freq_m(m, tc)
+    if iprint:
+        print('iterating initial phi')
+#    for m in tf.m_array(1, Nc):
+#        w_m = tf.freq_m(m, tc)
 #        new_phi[m-1] = llam/tf.dos(0)*tc*np.pi*tf.matsu_sum(1, Nc, tc,
 #                        init_summand, w_m, init_phi_v, zeta_v, w_e, tc, D)
 #        new_phi = np.copy([new_phi[i]/new_phi[0]
 #                          for i in range(Nc)])
-    new_phi = phi_sum.phi_init(
-            tc, g, w_e, tf.dee, emin, emax, init_phi_v, zeta_v,
-            [1/(emax-emin) for i in range(tf.nee)], Nc, tf.nee)
+    new_phi = phi_sum.phi_init( tc, g, w_e, tf.dee, emin, emax,
+                               init_phi_v, zeta_v, dos, Nc, tf.nee)
 
-#    print('converging phi')
+    if iprint:
+        print('converging phi')
     for i in range(1, maxiter+1):
-        old_phi = np.copy(new_phi)
+        old_phi = new_phi
 #        for m in tf.m_array(1, Nc):
 #            w_m = tf.freq_m(m, tc)
 #            new_phi[m-1] = (1-p_damp)*llam/tf.dos(0)*tc*np.pi*tf.matsu_sum(1, Nc, tc, summand,
 #                   w_m, old_phi, zeta_v, w_e, tc, D) + p_damp*old_phi[m-1]
 #            new_phi = np.copy([new_phi[i]/new_phi[0] for i in range(Nc)])
-#        for m in tf.m_array(1, Nc):
-#            w_m = tf.freq_m(m, tc)
-#            new_phi[m-1] = (1-p_damp)*llam/tf.dos(0)*tc*np.pi*phi_sum.phi_sum(
-#                    tc, g, w_e, w_m, tf.dee, emin, emax, old_phi, zeta_v,
-#                    [1/(emax-emin) for i in range(tf.nee)], Nc, tf.nee) + p_damp*old_phi[m-1]
-        new_phi = phi_sum.phi(
-                tc, g, w_e, tf.dee, emin, emax, p_damp,
-                old_phi, zeta_v, [1/(emax-emin) for i in range(tf.nee)], Nc, tf.nee)
+
+        new_phi = phi_sum.phi(tc, g, w_e, tf.dee, emin, emax,
+                              p_damp, old_phi, zeta_v, dos, Nc, tf.nee)
+
         diff_vec.append(tf.f_compare(old_phi, new_phi))
 
         if iprint:

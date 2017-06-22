@@ -1,4 +1,0 @@
-      subroutine init_zeta(t, g, w_e, dom_lim, maxiter, zeta_v)
-      double real t, g, w_e
-      integer dom_lim, maxiter
-      end subroutine

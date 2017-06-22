@@ -5,7 +5,6 @@ Created on Fri Jun  2 14:59:33 2017
 @author: Connor
 """
 import numpy as np
-import scipy.integrate as integral
 
 """
 important to have a data file with ttx and ttp data in the two column format
@@ -19,7 +18,9 @@ nee = np.size(dos_vals[:, 0])
 e_min = -8/ttp-6*abs(ttx)/ttp
 e_max = 8/ttp+6*abs(ttx)/ttp
 cusp = 6*ttx-4*ttx**3/ttp**2
-dos_len = np.size(dos_vals)
+dos = dos_vals[:, 1]
+dos_domain = dos_vals[:, 0]
+#dos = [1/(e_max-e_min) for i in range(nee)]
 
 def interpolater(f_domain, f_range):
     """
@@ -79,26 +80,26 @@ def n(x, t):
     return 1/(np.exp(x/t) - 1)
 
 
-def dos(e):
-    # interpolates the DOS from a given file
-#    if isinstance(e, (list, tuple, np.ndarray)):
-#        vals = []
-#        for i in e:
-#            l_index = binsearch(dos_vals[:, 0], i)
-#            if l_index+1 == dos_vals[:, 0].size:
-#                return
-#            vals.append(dos_vals[l_index, 1]
-#                        + (i-dos_vals[l_index, 0])*(dos_vals[l_index+1, 1]
-#                        - dos_vals[l_index, 1])/(dos_vals[l_index+1, 0]
-#                        - dos_vals[l_index, 0]))
-#        return vals
-#    else:
-#        l_index=binsearch(dos_vals[:,0],e)
-#        return (dos_vals[l_index,1]
-#                +(e-dos_vals[l_index,0])*(dos_vals[l_index+1,1]
-#                -dos_vals[l_index, 1])/(dos_vals[l_index + 1, 0]
-#                - dos_vals[l_index, 0]))
-    return 1/(e_max-e_min)
+#def dos(e):
+#    # interpolates the DOS from a given file
+##    if isinstance(e, (list, tuple, np.ndarray)):
+##        vals = []
+##        for i in e:
+##            l_index = binsearch(dos_vals[:, 0], i)
+##            if l_index+1 == dos_vals[:, 0].size:
+##                return
+##            vals.append(dos_vals[l_index, 1]
+##                        + (i-dos_vals[l_index, 0])*(dos_vals[l_index+1, 1]
+##                        - dos_vals[l_index, 1])/(dos_vals[l_index+1, 0]
+##                        - dos_vals[l_index, 0]))
+##        return vals
+##    else:
+##        l_index=binsearch(dos_vals[:,0],e)
+##        return (dos_vals[l_index,1]
+##                +(e-dos_vals[l_index,0])*(dos_vals[l_index+1,1]
+##                -dos_vals[l_index, 1])/(dos_vals[l_index + 1, 0]
+##                - dos_vals[l_index, 0]))
+#    return 1/(e_max-e_min)
 
 def s0(e, w, t, w_e, mu):
     """
