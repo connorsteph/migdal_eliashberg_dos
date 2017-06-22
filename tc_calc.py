@@ -27,7 +27,7 @@ def init_phi(w):
 
 
 def tc_calc(g, w_e, D, dom_lim, iprint=False, tol=1e-8, p_damp=0.3,
-            maxiter=150, t_tol=5e-2, p_tol=1e-2, plot=False):
+            maxiter=150, t_tol=5e-2, p_tol=1e-2, plot=False, const_dos=False):
     start = time()
     phi, tc, new_dom_lim = phi_solver(g, w_e, dom_lim, D,
                                       init_phi, maxiter=maxiter, p_damp=p_damp,

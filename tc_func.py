@@ -10,7 +10,7 @@ import numpy as np
 important to have a data file with ttx and ttp data in the two column format
 """
 
-data = np.loadtxt('ttx_0d0_nx_500_dee_1d-2.dat', skiprows=1, usecols=[0, 1])
+data = np.loadtxt('ttx_0d0_nx_500_dee_5d-2.dat', skiprows=1, usecols=[0, 1])
 dos_vals = data[1:, :]
 [ttp, ttx] = data[0, :]
 dee = dos_vals[1, 0] - dos_vals[0, 0]
@@ -18,8 +18,8 @@ nee = np.size(dos_vals[:, 0])
 e_min = -8/ttp-6*abs(ttx)/ttp
 e_max = 8/ttp+6*abs(ttx)/ttp
 cusp = 6*ttx-4*ttx**3/ttp**2
+#dos_domain = dos_vals[:, 0]
 dos = dos_vals[:, 1]
-dos_domain = dos_vals[:, 0]
 #dos = [1/(e_max-e_min) for i in range(nee)]
 
 def interpolater(f_domain, f_range):

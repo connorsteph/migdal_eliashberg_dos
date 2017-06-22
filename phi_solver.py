@@ -22,7 +22,7 @@ dos = tf.dos
 
 def tc_root_eqn(
         t, g, w_e, D, phi, dom_lim):
-    Nc = 60
+    Nc = 25
     zeta, zeta_v = zeta_solver(t, g, w_e, Nc, D)
     llam = 2*tf.dos[np.int(tf.nee/2 + 1)]*g**2/w_e
 #    return np.pi*llam/tf.dos(0)*t*tf.matsu_sum(
