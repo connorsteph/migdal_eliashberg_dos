@@ -163,7 +163,8 @@ def f_compare(v1, v2):
     diff = 0.0
     assert(np.size(v1) == np.size(v2))
     for i in range(np.size(v1)):
-        diff += abs((v1[i]-v2[i]))
+        diff += (v1[i]/v2[i])**2-1
+#        diff += abs(v1[i]-v2[i])
     return diff/np.size(v1)
 
 

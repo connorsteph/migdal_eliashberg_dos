@@ -10,7 +10,8 @@ from tc_calc import tc_calc
 import tc_func as tf
 from time import time
 import matplotlib.pyplot as plt
-
+import phi_matrix
+print(phi_matrix.phi_matrix.__doc__)
 start = time()
 emin = tf.e_min
 emax = tf.e_max
@@ -33,7 +34,9 @@ p_damp = 0.3
 maxiter = 50
 tol = 1e-5
 damp = 0.3
-
+#plt.figure()
+#plt.plot(tf.dos)
+#plt.plot([1/(emax-emin) for i in range(tf.nee)])
 #points = 20
 #domain = np.linspace(0.1*D, 0.7*D, points)
 #rrange = np.empty(points)
@@ -74,7 +77,11 @@ damp = 0.3
 #plt.ylabel(r'$\frac{T_C}{\omega_E}$', fontsize=14)
 #plt.title('Critical Temp. versus Char. Freq. for Const. DOS 1/D')
 #plt.savefig('tc_vs_w_e_lam_2_const_dos_dee_5d-2.pdf', bbox_inches='tight', dpi = 300)
-tc = tc_calc(g, w_e, n, mu, dom_lim, maxiter=maxiter, tol=tol,
-             p_tol=5e-5, t_tol=5e-2, plot=False, iprint=False)
-print(tc/w_e)
+#plt.figure()
+#plt.plot([1,2,3,4,5], [tc_calc(g, w_e, n, mu, dom_lim, maxiter=maxiter, tol=tol,
+#             p_tol=tol, t_tol=5e-2, plot=False, iprint=False)/w_e for tol in [1e-1, 1e-2, 1e-3, 1e-4, 1e-5]])
+
+#tc = tc_calc(g, w_e, n, mu, dom_lim, maxiter=maxiter, tol=tol,
+#             p_tol=tol, t_tol=5e-2, plot=False, iprint=False)
+#print(tc/w_e)
 print('Runtime = %g' % (time() - start))

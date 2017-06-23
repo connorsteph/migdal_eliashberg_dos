@@ -19,10 +19,9 @@ epsrel = 1e-4
 epsabs = 1e-4
 dos = tf.dos
 
-
 def tc_root_eqn(
         t, g, w_e, mu, dos_mu, phi, dom_lim):
-    Nc = 25
+    Nc = 50
     zeta_v = zeta_solver(t, g, w_e, mu, dos_mu, Nc)
     llam = 2*dos_mu*g**2/w_e
     phi_v = [phi(w) for w in tf.freq_array(1, Nc, t)]
