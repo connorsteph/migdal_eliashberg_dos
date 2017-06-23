@@ -6,7 +6,6 @@ Created on Fri Jun  2 15:16:42 2017
 """
 
 import numpy as np
-import scipy.integrate as itg
 import matplotlib.pyplot as plt
 import tc_func as tf
 import zeta_sum
@@ -18,30 +17,8 @@ epsabs = 1e-4
 dos = tf.dos
 
 
-def integrand(e, zeta_m):
-        return (tf.dos(e)/np.pi)/(zeta_m**2 + e**2)
-
-
-def init_summand(w_n, n, w_m, w_e, D):
-    return tf.lam_odd(w_e, w_m, w_n)*w_n*itg.quad(
-            integrand, emin, emax, args=(w_n), limit=100,
-            points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs
-            )[0]
-
-
-def summand(w_n, n, w_m, zeta, w_e, t, D):
-    return tf.lam_odd(w_e, w_m, w_n)*zeta[n-1]*itg.quad(
-        integrand, emin, emax, args=(zeta[n-1]),
-        limit=100, points=([tf.cusp]), epsrel=epsrel, epsabs=epsabs)[0]
-
-
-def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
+def zeta_solver(t, g, w_e, mu, dos_mu, dom_lim, maxiter=150,
                 tol=1e-3, iprint=False, damp=0.3):
-    # n takes the place of m'
-#    llam = 2*tf.dos(0)*g**2/(w_e)
-
-#    print('*********************\ng: %g, w_e: %g, D: %g' % (g, w_e, D))
-#    print('lambda = %g' % llam)
     """
     attempts to converge the zeta function, from an initial guess
     where zeta(iw_m)=w_m.
@@ -63,8 +40,8 @@ def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
                 1, dom_lim, t), '.', markersize='2')
     diff_vec = np.empty(maxiter+1)
     new_zeta = np.zeros(Nc)
-    new_zeta = zeta_sum.zeta_init(t, g, w_e, dos,
-                                              tf.dee, emin, emax, Nc, tf.nee)
+    new_zeta = zeta_sum.zeta_init(t, g, w_e, tf.dee, emin, emax,
+                                  dos_mu, dos, Nc, tf.nee)
     if iprint:
         plt.plot(tf.m_array(1, dom_lim),
                  new_zeta[:dom_lim], '--', label='it 0')
@@ -79,7 +56,7 @@ def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
     for i in range(1, maxiter+1):
         old_zeta = new_zeta
         new_zeta = zeta_sum.zeta(
-                t, g, w_e, dos, tf.dee, emin, emax, old_zeta, damp, Nc, tf.nee)
+                t, g, w_e, tf.dee, emin, emax, dos_mu, damp, dos, old_zeta, Nc, tf.nee)
         diff_vec[i] = (tf.f_compare(old_zeta, new_zeta))
 
         if(np.mod(i, maxiter // 5) == 0):
@@ -114,5 +91,6 @@ def zeta_solver(t, g, w_e, dom_lim, D, maxiter=150,
         plt.ylabel('Log Diff')
         plt.title('Log difference in iterated fnc. Damping =%2.2f' % damp)
         plt.show()
-    zeta = tf.interpolater(tf.freq_array(1, dom_lim, t), new_zeta[:dom_lim])
-    return zeta, new_zeta[:dom_lim]
+#    zeta = tf.interpolater(tf.freq_array(1, dom_lim, t), new_zeta[:dom_lim])
+#    return zeta, new_zeta[:dom_lim]
+    return new_zeta[:dom_lim]

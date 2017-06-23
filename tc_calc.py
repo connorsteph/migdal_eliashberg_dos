@@ -26,16 +26,17 @@ def init_phi(w):
     return 1/w
 
 
-def tc_calc(g, w_e, D, dom_lim, iprint=False, tol=1e-8, p_damp=0.3,
+def tc_calc(g, w_e, n, mu, dom_lim, iprint=False, tol=1e-8, p_damp=0.3,
             maxiter=150, t_tol=5e-2, p_tol=1e-2, plot=False, const_dos=False):
     start = time()
-    phi, tc, new_dom_lim = phi_solver(g, w_e, dom_lim, D,
+    dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
+    phi, tc, new_dom_lim = phi_solver(g, w_e, mu, dos_mu, dom_lim,
                                       init_phi, maxiter=maxiter, p_damp=p_damp,
                                       iprint=iprint, tol=tol, p_tol=p_tol,
                                       t_tol=t_tol
                                       )
     if plot:
-        llam = 2*tf.dos[int(tf.nee/2 + 1)]*g**2/w_e
+        llam = 2*tf.dos[int(tf.nee/2)]*g**2/w_e
         plt.figure(num=None, figsize=(6, 8), dpi=150,
                    facecolor='w', edgecolor='k')
         plt.grid(True)

@@ -1,16 +1,15 @@
-      subroutine phi(t, g, w_e, dee, emin, emax, p_damp,
+      subroutine phi(t, g, w_e, dee, emin, emax, dos_mu, p_damp,
      -     new_phi, old_phi, zeta, dos, nc, nee)
       implicit none
-      real*8, intent(in) :: t, g, w_e, dee, emin, emax, p_damp
+      real*8, intent(in) :: t, g, w_e, dee, emin, emax, p_damp, dos_mu
       integer, intent(in) :: nc, nee
       real*8, intent(in) :: dos(0:nee-1)
       real*8, intent(in) :: old_phi(0:nc-1), zeta(0:nc-1)
       real*8, intent(out) :: new_phi(0:nc-1)
       integer :: j
       real*8, parameter :: pi = 3.1415926535897
-      real*8 :: matsu_sum, dos_mu, lambda, w_m
+      real*8 :: matsu_sum, lambda, w_m
       external :: phi_sum
-      dos_mu = dos(nee/2)
       lambda = 2*dos_mu*g**2/w_e
       do j = 0,nc-1
          w_m = pi*t*(2*(j+1)-1)
@@ -24,19 +23,18 @@
       end do
       end subroutine
       
-      subroutine phi_init(t, g, w_e, dee, emin, emax,
+      subroutine phi_init(t, g, w_e, dee, emin, emax, dos_mu,
      -     init_phi, zeta, dos, new_phi, nc, nee)
       implicit none
-      real*8, intent(in) :: t, g, w_e, dee, emin, emax
+      real*8, intent(in) :: t, g, w_e, dee, emin, emax, dos_mu
       integer, intent(in) :: nc, nee
       real*8, intent(in) :: dos(0:nee-1)
       real*8, intent(in) :: init_phi(0:nc-1), zeta(0:nc-1)
       real*8, intent(out) :: new_phi(0:nc-1)
       integer :: j
       real*8, parameter :: pi = 3.1415926535897
-      real*8 :: matsu_sum, lambda, dos_mu, w_m
+      real*8 :: matsu_sum, lambda, w_m
       external :: phi_sum_init
-      dos_mu = dos(nee/2)
       lambda = 2*dos_mu*g**2/w_e
       do j = 0,nc-1
          w_m = pi*t*(2*(j+1)-1)
@@ -82,7 +80,7 @@
       real*8, intent(in) :: dos(0:nee-1)
       real*8, intent(out) :: integral
       integer :: j
-      real*8, parameter :: pi = 3.1415926535897
+      real*8, parameter :: pi = 3.141592653589793
       integral = 0.0d0
       do j = 0, nee-2
          integral = integral + 0.5d0*dee/pi*(dos(j)/((emin
@@ -124,7 +122,7 @@
       real*8, intent(in) :: dos(0:nee-1)
       real*8, intent(out) :: integral
       integer :: j
-      real*8, parameter :: pi = 3.1415926535897
+      real*8, parameter :: pi = 3.141592653589793
       integral = 0.0d0
       do j = 0, nee-2
          integral = integral + 0.5d0*dee/pi*(dos(j)/((emin
