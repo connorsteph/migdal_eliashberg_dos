@@ -13,8 +13,8 @@
       lambda = 2*dos_mu*g**2/w_e
       do j = 0,nc-1
          w_m = pi*t*(2*(j+1)-1)
-         call chi_sum(t, g, w_e, w_m, dos, dee,
-     -        emin, emax, mu, old_zeta, old_chi, matsu_sum, nc, nee)
+         call chi_sum(t, g, w_e, w_m, mu, dos, dee,
+     -        emin, emax, zeta, old_chi, matsu_sum, nc, nee)
          new_chi(j) = (1-damp)*(-lambda/dos_mu*t*pi*matsu_sum)
      -        + damp*old_chi(j)
       end do
@@ -35,21 +35,21 @@
       lambda = 2*dos_mu*g**2/w_e
       do j = 0,nc-1
          w_m = pi*t*(2*(j+1)-1)
-         call chi_sum_init(t, g, w_e, w_m, mu, dee,
-     -        emin, emax, dos, zeta, init_chi, matsu_sum, nc, nee)
+         call chi_sum_init(t, g, w_e, w_m, dee,
+     -        emin, emax, mu, dos, zeta, init_chi, matsu_sum, nc, nee)
          new_chi(j) = -lambda/dos_mu*t*pi*matsu_sum
       end do
       end subroutine
       
-      subroutine chi_sum(t, g, w_e, w_m, dos, dee,
-     - emin, emax, mu, zeta, old_chi, ssum, nc, nee)
+      subroutine chi_sum(t, g, w_e, w_m, mu, dos, dee,
+     - emin, emax, zeta, old_chi, ssum, nc, nee)
       implicit none
-      real*8, intent(in) :: t, g, w_e, w_m, dee, emin, emax
+      real*8, intent(in) :: t, g, w_e, w_m, dee, emin, emax, mu
       integer, intent(in) :: nc, nee
       real*8, intent(in) :: zeta(0:nc-1), old_chi(0:nc-1)
       real*8, intent(in) :: dos(0:nee-1)       
       real*8, intent(out) :: ssum
-      real*8 :: w_n, integral, w_e2, lam_odd
+      real*8 :: w_n, integral, w_e2, lam_even
       integer :: n
       external :: quad
       real*8, parameter :: pi = 3.1415926535897
@@ -58,19 +58,19 @@
       do n = 0,nc-1
          integral = 0.0d0
          w_n = pi*t*(2*(n+1)-1)
-         lam_odd = (w_e2)*(1/(w_e2+(w_m-w_n)**2)
-     -        -1/(w_e2+(w_m+w_n)**2))
-         call quad(dos, emin, emax, dee, zeta(n), old_chi(n),
+         lam_even = (w_e2)*(1/(w_e2+(w_m-w_n)**2)
+     -        +1/(w_e2+(w_m+w_n)**2))
+         call quad(dos, emin, emax, mu, dee, zeta(n), old_chi(n),
      -        w_e, integral, nee)
-         ssum = ssum + lam_odd*integral
+         ssum = ssum + lam_even*integral
       end do
       end subroutine
 
-      subroutine quad(dos, emin, emax, dee, zeta_n, chi_n,
+      subroutine quad(dos, emin, emax, mu, dee, zeta_n, chi_n,
      -     w_e, integral, nee)
       implicit none
       integer, intent(in) :: nee
-      real*8, intent(in) :: emin, emax, dee, zeta_n, chi_n, w_e
+      real*8, intent(in) :: emin, emax, dee, zeta_n, chi_n, w_e, mu
       real*8, intent(in) :: dos(0:nee-1)
       real*8, intent(out) :: integral
       real*8 :: ebar_j, ebar_j_1
@@ -87,13 +87,14 @@
       end subroutine
 
       subroutine chi_sum_init(t, g, w_e, w_m, mu, dee,
-     - emin, emax, dos, zeta, init_chi, ssum, nc, nee)
+     - emin, emax, dos, zeta, ssum, nc, nee)
       implicit none
-      real*8, intent(in) :: t, g, w_e, w_m, dee, emin, emax
+      real*8, intent(in) :: t, g, w_e, w_m, dee, emin, emax, mu
       integer, intent(in) :: nc, nee
-      real*8, intent(in) :: dos(0:nee-1)       
+      real*8, intent(in) :: dos(0:nee-1)
+      real*8, intent(in) :: zeta(0:nc-1)
       real*8, intent(out) :: ssum
-      real*8 :: w_n, integral, w_e2, lam_odd
+      real*8 :: w_n, integral, w_e2, lam_even
       integer :: n
       external :: quad_init
       real*8, parameter :: pi = 3.141592653589793
@@ -102,11 +103,11 @@
       do n = 0,nc-1
          integral = 0.0d0
          w_n = pi*t*(2*(n+1)-1)
-         lam_odd = (w_e2)*(1/(w_e2+(w_m-w_n)**2)
-     -        -1/(w_e2+(w_m+w_n)**2))
-         call quad_init(dos, emin, emax, mu, dee, zeta_n,
+         lam_even = (w_e2)*(1/(w_e2+(w_m-w_n)**2)
+     -        +1/(w_e2+(w_m+w_n)**2))
+         call quad_init(dos, emin, emax, mu, dee, zeta(n),
      -        init_chi_n, w_e, integral, nee)
-         ssum = ssum + lam_odd*integral
+         ssum = ssum + lam_even*integral
       end do
       end subroutine
 
@@ -114,7 +115,7 @@
      -     w_e, integral, nee)
       implicit none
       integer, intent(in) :: nee
-      real*8, intent(in) :: emin, emax, dee, zeta_n, chi_n, w_e
+      real*8, intent(in) :: emin, emax, dee, zeta_n, chi_n, w_e, mu
       real*8, intent(in) :: dos(0:nee-1)
       real*8, intent(out) :: integral
       real*8 :: ebar_j, ebar_j_1
