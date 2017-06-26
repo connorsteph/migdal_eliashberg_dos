@@ -10,8 +10,7 @@ from tc_calc import tc_calc
 import tc_func as tf
 from time import time
 import matplotlib.pyplot as plt
-import phi_matrix
-print(phi_matrix.phi_matrix.__doc__)
+
 start = time()
 emin = tf.e_min
 emax = tf.e_max
@@ -21,15 +20,16 @@ Problem params
 D = (emax-emin)
 w_e = 16/2.5
 lam_want = 2
-g = np.sqrt(lam_want*w_e/2/tf.dos[np.int(tf.nee/2)])
 mu = 0.0
 n = 1.0
+dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
+g = np.sqrt(lam_want*w_e/2/dos_mu)
 print('Lambda = %g' %lam_want)
 """
 Algorithm params
 """
 
-dom_lim = 200
+dom_lim = 80
 p_damp = 0.3
 maxiter = 50
 tol = 1e-5
@@ -81,7 +81,7 @@ damp = 0.3
 #plt.plot([1,2,3,4,5], [tc_calc(g, w_e, n, mu, dom_lim, maxiter=maxiter, tol=tol,
 #             p_tol=tol, t_tol=5e-2, plot=False, iprint=False)/w_e for tol in [1e-1, 1e-2, 1e-3, 1e-4, 1e-5]])
 
-#tc = tc_calc(g, w_e, n, mu, dom_lim, maxiter=maxiter, tol=tol,
-#             p_tol=tol, t_tol=5e-2, plot=False, iprint=False)
-#print(tc/w_e)
+tc = tc_calc(g, w_e, n, mu, dom_lim, maxiter=maxiter, tol=tol,
+             p_tol=tol, t_tol=5e-2, plot=True, iprint=True)
+print(tc/w_e)
 print('Runtime = %g' % (time() - start))
