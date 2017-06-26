@@ -27,7 +27,7 @@ def init_phi(w):
 
 
 def tc_calc(g, w_e, n, mu, dom_lim, iprint=False, tol=1e-8, p_damp=0.3,
-            maxiter=150, t_tol=5e-2, p_tol=1e-2, plot=False, const_dos=False):
+            maxiter=150, t_tol=5e-2, p_tol=1e-2, plot=False):
     start = time()
     dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
     tc, phi, phi_v = phi_solver(g, w_e, mu, dos_mu, dom_lim,
