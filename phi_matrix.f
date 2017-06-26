@@ -9,17 +9,20 @@
       integer :: i, j
       real*8, parameter :: pi = 3.1415926535897
       real*8 :: lambda, w_i, w_j, dos_integral, w_e2
+      real*8 :: lam_even
       external :: quad
       lambda = 2*dos_mu*g**2/w_e
       w_e2 = w_e*w_e
       do j = 0,nc-1
-         w_j = pi*t*(2*j - 1)
+         w_j = pi*t*(2*(j+1) - 1)
          do i = 0,nc-1
-            w_i = pi*t*(2*i - 1)
+            w_i = pi*t*(2*(i+1) - 1)
+            lam_even = (w_e2)*(1/(w_e2+(w_i-w_j)**2)
+     -        +1/(w_e2+(w_i+w_j)**2))
             call quad(dos, emin, emax, dee, zeta(j),
      -        w_e, dos_integral, nee)
-            matrix(i, j) = pi*t*lambda/dos_mu*w_e2/(w_e2 +
-     -           (w_i - w_j)**2)*dos_integral
+            matrix(i, j) = pi*t*lambda/dos_mu
+     - *lam_even*dos_integral
          end do
       end do
       end subroutine
