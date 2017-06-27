@@ -1,5 +1,5 @@
       subroutine zeta(t, g, w_e, mu, dee, emin, emax, dos_mu,
-     -      damp, dos, new_zeta, old_zeta, chi, nc, nee)
+     -      damp, dos, old_zeta, chi, new_zeta, nc, nee)
       implicit none
       real*8, intent(in) :: t, g, w_e, dee, emin, emax, damp, mu, dos_mu
       integer, intent(in) :: nc, nee
@@ -21,7 +21,7 @@
       end subroutine
       
       subroutine zeta_init(t, g, w_e, mu, dee, emin,
-     -     emax,  dos_mu, dos, new_zeta, chi, nc, nee)
+     -     emax,  dos_mu, dos, init_zeta, chi, new_zeta, nc, nee)
       implicit none
       real*8, intent(in) :: t, g, w_e, dee, emin, emax, mu, dos_mu
       integer, intent(in) :: nc, nee

@@ -22,47 +22,39 @@ Pseudo Code:
 """
 
 
-def init_phi(w):
-    return 1/w
 
 
-def tc_calc(g, w_e, n, mu, dom_lim, iprint=False, tol=1e-8, p_damp=0.3,
+
+def tc_calc(llam, w_e, n, dom_lim, iprint=False, tol=1e-8, p_damp=0.3,
             maxiter=150, t_tol=5e-2, p_tol=1e-2, plot=False):
-    start = time()
-    dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
-    tc, phi, phi_v = phi_solver(g, w_e, mu, dos_mu, dom_lim,
-                                      init_phi, maxiter=maxiter, p_damp=p_damp,
+#    start = time()
+    tc, mu, chi, zeta, phi = phi_solver(llam, w_e, dom_lim, maxiter=maxiter, p_damp=p_damp,
                                       iprint=iprint, tol=tol, p_tol=p_tol,
                                       t_tol=t_tol
                                       )
-    llam  = 2*g**2*dos_mu/w_e
 
+#    if plot:
+#        plt.figure(2, figsize=(6, 8), dpi=150,
+#                   facecolor='w', edgecolor='k')
+#        plt.grid(True)
+#        plt.ylim([0, 1])
+#        plt.plot(tf.m_array(1, dom_lim),
+#                 [phi(w) for w in tf.freq_array(1, dom_lim, tc)])
+#        plt.ylim([-1, 1])
+#        plt.xlim([0, dom_lim])
+##        plt.xlabel(r'$\frac{\omega_m}{\omega_E}$', fontsize=18)
+#        plt.xlabel(r'$m$')
+#        plt.title(r'$\phi$ for $T_c$ = %5.4g $\omega_E$' % (tc/w_e),
+#                  fontsize=22)
+#        plt.savefig('phi_tc_lam_%g_we_%g.pdf'
+#                    % (llam, w_e),
+#                    bbox_inches='tight')
+#        plt.show()
+#
+#        print('lambda = %g\n*********************' % llam)
+#        print('dom_lim = %i' % dom_lim)
+#        print('Converged tc/w_e: %3.2g' % (tc/w_e))
+#        end = time()
+#        print('\nRuntime: ', end-start)
 
-    if plot:
-        llam = 2*tf.dos[int(tf.nee/2)]*g**2/w_e
-        plt.figure(2, figsize=(6, 8), dpi=150,
-                   facecolor='w', edgecolor='k')
-        plt.grid(True)
-        plt.ylim([0, 1])
-        domain = [w/w_e for w in tf.freq_array(1, dom_lim, tc)]
-        plt.plot(tf.m_array(1, dom_lim),
-                 [phi(w) for w in tf.freq_array(1, dom_lim, tc)])
-        plt.ylim([-1, 1])
-        plt.xlim([0, dom_lim])
-#        plt.xlabel(r'$\frac{\omega_m}{\omega_E}$', fontsize=18)
-        plt.xlabel(r'$m$')
-        plt.title(r'$\phi$ for $T_c$ = %5.4g $\omega_E$' % (tc/w_e),
-                  fontsize=22)
-        plt.savefig('phi_tc_lam_%g_we_%g.pdf'
-                    % (llam, w_e),
-                    bbox_inches='tight')
-        plt.show()
-
-        print('*********************\ng: %g, w_e: %3.2g' % (g, w_e))
-        print('lambda = %g\n*********************' % llam)
-        print('dom_lim = %i' % dom_lim)
-        print('Converged tc/w_e: %3.2g' % (tc/w_e))
-        end = time()
-        print('\nRuntime: ', end-start)
-
-    return tc
+    return tc, mu,

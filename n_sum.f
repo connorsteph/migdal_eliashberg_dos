@@ -1,11 +1,11 @@
-      subroutine n(t, g, w_e, dee, emin, emax, mu,
-     -      dos, zeta, chi, n_occ, nc, nee)
+      subroutine n_occ(t, g, w_e, dee, emin, emax, mu,
+     -      dos, zeta, chi, n, nc, nee)
       implicit none
       real*8, intent(in) :: t, g, w_e, dee, emin, emax, mu
       integer, intent(in) :: nc, nee
       real*8, intent(in) :: dos(0:nee-1)
       real*8, intent(in) :: zeta(0:nc-1), chi(0:nc-1)
-      real*8, intent(out) :: n_occ
+      real*8, intent(out) :: n
       real*8, parameter :: pi = 3.1415926535897
       real*8 :: ssum, w_m, integral
       integer :: j

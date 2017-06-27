@@ -28,7 +28,7 @@ def tc_root_eqn(t, llam, w_e, n, dom_lim):
                                      dos_mu, zeta, chi, dos)
     return np.linalg.det(p_matrix-np.identity(Nc))
 
-def phi_solver(llam, w_e, n, dom_lim, init_phi, maxiter=100, p_damp=0.3,
+def tc_solver(llam, w_e, n, dom_lim, maxiter=100, p_damp=0.3,
                iprint=False, tol=1e-5, damp=0.3, p_tol=1e-2,
                t_tol=5e-2, tc=None,
                ):

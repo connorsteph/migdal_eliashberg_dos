@@ -22,6 +22,19 @@ dos_domain = dos_vals[:, 0]
 dos = dos_vals[:, 1]
 #dos = [1/(e_max-e_min) for i in range(nee)]
 
+
+def init_phi(w):
+    return 1/w
+
+
+def init_chi(w):
+    return 1/w**2
+
+
+def init_zeta(w):
+    return w
+
+
 def interpolater(f_domain, f_range):
     """
     given a set of x_i, f(x_i), returns an interpolated function

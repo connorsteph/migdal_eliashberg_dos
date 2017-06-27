@@ -17,7 +17,7 @@ epsabs = 1e-4
 dos = tf.dos
 
 
-def zeta_solver(t, g, w_e, mu, dos_mu, dom_lim, maxiter=150,
+def zeta_solver(t, g, w_e, mu, chi, init_zeta, dos_mu, dom_lim, maxiter=150,
                 tol=1e-3, iprint=False, damp=0.3):
     """
     attempts to converge the zeta function, from an initial guess
@@ -40,8 +40,8 @@ def zeta_solver(t, g, w_e, mu, dos_mu, dom_lim, maxiter=150,
                 1, dom_lim, t), '.', markersize='2')
     diff_vec = np.empty(maxiter+1)
     new_zeta = np.zeros(Nc)
-    new_zeta = zeta_sum.zeta_init(t, g, w_e, tf.dee, emin, emax,
-                                  dos_mu, dos, Nc, tf.nee)
+    new_zeta = zeta_sum.zeta(t, g, w_e, mu, tf.dee, emin, emax,
+                                  dos_mu, damp, dos, init_zeta, chi)
     if iprint:
         plt.plot(tf.m_array(1, dom_lim),
                  new_zeta[:dom_lim], '--', label='it 0')
@@ -56,7 +56,8 @@ def zeta_solver(t, g, w_e, mu, dos_mu, dom_lim, maxiter=150,
     for i in range(1, maxiter+1):
         old_zeta = new_zeta
         new_zeta = zeta_sum.zeta(
-                t, g, w_e, tf.dee, emin, emax, dos_mu, damp, dos, old_zeta, Nc, tf.nee)
+                t, g, w_e, tf.dee, emin, emax,
+                dos_mu, damp, dos, old_zeta, chi)
         diff_vec[i] = (tf.f_compare(old_zeta, new_zeta))
 
         if(np.mod(i, maxiter // 5) == 0):
