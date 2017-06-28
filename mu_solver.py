@@ -62,7 +62,7 @@ def mu_solver(t, llam, w_e, n, init_chi, init_zeta, Nc, tol=1e-3,
 ##    plt.legend(loc = 'best')
 #    plt.show()
     mu = brentq(mu_root_eqn, -0.01, 0.01, args=(
-            t, llam, w_e, n, init_chi, init_zeta, Nc))
+            t, llam, w_e, n, init_chi, init_zeta, Nc), xtol=1e-5)
 #    print('mu is %g' % mu)
     dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
     g = sqrt(llam*w_e/2/dos_mu)

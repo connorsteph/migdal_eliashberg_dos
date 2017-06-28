@@ -55,7 +55,7 @@ def tc_solver(llam, w_e, n, dom_lim, maxiter=100, p_damp=0.3,
 #    plt.legend(loc = 'best')
 #    plt.show()
     tc = brentq(tc_root_eqn, l_root, w_e, args=(
-            llam, w_e, n, dom_lim))
+            llam, w_e, n, dom_lim), xtol=1e-5)
     init_chi = [tf.init_chi(w) for w in tf.freq_array(1, Nc, tc)]
     init_zeta = [tf.init_zeta(w) for w in tf.freq_array(1, Nc, tc)]
     mu, zeta, chi = mu_solver(tc, llam, w_e, n, init_chi, init_zeta, Nc)
