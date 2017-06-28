@@ -21,12 +21,13 @@
       end subroutine
       
       subroutine zeta_init(t, g, w_e, mu, dee, emin,
-     -     emax,  dos_mu, dos, init_zeta, chi, new_zeta, nc, nee)
+     -     emax,  dos_mu, dos, chi, new_zeta, nc, nee)
       implicit none
       real*8, intent(in) :: t, g, w_e, dee, emin, emax, mu, dos_mu
       integer, intent(in) :: nc, nee
       real*8, intent(in) :: dos(0:nee-1)
-      real*8, intent(out) :: new_zeta(0:nc-1), chi(0:nc-1)
+      real*8, intent(in) ::  chi(0:nc-1)
+      real*8, intent(out) :: new_zeta(0:nc-1)
       integer :: j
       real*8, parameter :: pi = 3.1415926535897
       real*8 :: matsu_sum, lambda, w_m

@@ -4,10 +4,12 @@ Created on Mon Jun 26 12:16:36 2017
 
 @author: Connor
 """
+import numpy as np
 from numpy import sqrt
 import tc_func as tf
 from zeta_solver import zeta_solver
 from chi_solver import chi_solver
+import matplotlib.pyplot as plt
 import n_sum
 from scipy.optimize import brentq
 emax = tf.e_max
@@ -16,43 +18,74 @@ epsrel = 1e-4
 epsabs = 1e-4
 dos = tf.dos
 """
-given tc, lambda, w_e, and n, calculates a self consistent mu, chi, and zeta.
+given tc, lambda, w_e, and n, calculates a self consistent mu,
+chi, and zeta.
 """
 
-def mu_root_eqn(mu, t, llam, w_e, n, init_chi_v, init_zeta_v,
-                     dos_mu, dom_lim, maxiter=50,tol=1e-3, damp=0.3):
-    dos_mu = dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
+def mu_root_eqn(mu, t, llam, w_e, n, init_chi,
+                init_zeta, Nc, maxiter=10,tol=1e-3, damp=0.9):
+#    print('call')
+    dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
     g = sqrt(llam*w_e/2/dos_mu)
-    new_zeta = zeta_solver(t, g, w_e, mu, init_chi_v, init_zeta_v, dos_mu, dom_lim+20)
-    new_chi = chi_solver(t, g, w_e, mu, init_chi_v, new_zeta, dos_mu, dom_lim+20)
+#    print('getting init zeta')
+    new_zeta = zeta_solver(t, g, w_e, mu,  dos_mu, init_chi,
+                           init_zeta, Nc, iprint=False)
+#    print('getting init chi')
+    new_chi = chi_solver(t, g, w_e, mu, dos_mu, init_chi,
+                         new_zeta, Nc, damp = damp, iprint=False)
     for i in range(1,maxiter+1):
         old_zeta = new_zeta
         old_chi = new_chi
-        new_zeta = zeta_solver(t, g, w_e, mu, old_chi, old_zeta, dos_mu, dom_lim+20)
-        new_chi = chi_solver(t, g, w_e, mu, old_chi, new_zeta, dos_mu, dom_lim+20)
-        if (tf.f_compare(new_chi, old_chi) <= tol and tf.f_compare(new_chi, old_chi) <= tol):
+#        print('zeta')
+        new_zeta = zeta_solver(t, g, w_e, mu, dos_mu, old_chi, old_zeta,  Nc)
+#        print('chi')
+        new_chi = chi_solver(t, g, w_e, mu, dos_mu, old_chi, new_zeta, Nc, damp = damp)
+#        print(tf.f_compare(new_chi, old_chi),tf.f_compare(new_zeta,
+#              old_zeta))
+
+        if (tf.f_compare(new_chi, old_chi) <= tol and
+            tf.f_compare(new_chi, old_chi) <= tol):
             break
         if i == maxiter:
-            print('zeta and chi not converged for mu')
-    return n - n_sum.n_occ(t, g, w_e, emin, emax, mu, dos,
+            print('zeta and chi did not converge for mu at t = %g' % t)
+            print('damp = %g' % damp)
+            print('last difference: %g' % tf.f_compare(new_chi, old_chi))
+    return n - n_sum.n_occ(t, g, w_e, tf.dee, emin, emax, mu, dos,
                        new_zeta, new_chi)
 
 
-def mu_solver(t, llam, w_e, n, init_chi, init_zeta,
-              dos_mu, tol=1e-3, maxiter=50):
+def mu_solver(t, llam, w_e, n, init_chi, init_zeta, Nc, tol=1e-3,
+              maxiter=30, damp = 0.9):
+#    print('mu solver')
     dom_lim = len(init_chi)
-    mu = brentq(mu_root_eqn, emin, emax, args=(
-            t, llam, w_e, n, init_chi, init_zeta, dos_mu, dom_lim))
+    num = 10
+    mu_domain = np.linspace(-0.01, 0.01, num)
+    y = np.zeros(num)
+    for c, mu in enumerate(mu_domain, 0):
+        y[c] = (mu_root_eqn(mu, t, llam, w_e, n, init_chi, init_zeta, Nc, damp=damp))
+#    plt.figure()
+#    plt.plot(mu_domain, y, 'o-')
+#    plt.xlabel('mu')
+##    plt.legend(loc = 'best')
+#    plt.show()
+    mu = brentq(mu_root_eqn, -0.01, 0.01, args=(
+            t, llam, w_e, n, init_chi, init_zeta, Nc))
+#    print('mu is %g' % mu)
     dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
     g = sqrt(llam*w_e/2/dos_mu)
-    new_zeta = zeta_solver(t, g, w_e, mu, init_chi, init_zeta, dos_mu, dom_lim+20)
-    new_chi = chi_solver(t, g, w_e, mu, init_chi, new_zeta, dos_mu, dom_lim+20)
+    new_zeta = zeta_solver(t, g, w_e, mu, dos_mu, init_chi,
+                           init_zeta, dom_lim)
+    new_chi = chi_solver(t, g, w_e, mu, dos_mu, init_chi,
+                         new_zeta, dom_lim)
     for i in range(1,maxiter+1):
         old_zeta = new_zeta
         old_chi = new_chi
-        new_zeta = zeta_solver(t, g, w_e, mu, old_chi, old_zeta, dos_mu, dom_lim+20)
-        new_chi = chi_solver(t, g, w_e, mu, old_chi, new_zeta, dos_mu, dom_lim+20)
-        if (tf.f_compare(new_chi, old_chi) <= tol and tf.f_compare(new_chi, old_chi) <= tol):
+        new_zeta = zeta_solver(t, g, w_e, mu, dos_mu, old_chi,
+                               old_zeta, dom_lim)
+        new_chi = chi_solver(t, g, w_e, mu, dos_mu, old_chi,
+                             new_zeta, dom_lim)
+        if (tf.f_compare(new_chi, old_chi) <= tol
+            and tf.f_compare(new_chi, old_chi) <= tol):
             break
         if i == maxiter:
             print('zeta and chi not converged for mu')

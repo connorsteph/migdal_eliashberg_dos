@@ -17,11 +17,11 @@ emin = tf.e_min
 epsrel = 1e-4
 epsabs = 1e-4
 dos = tf.dos
-def tc_root_eqn(t, llam, w_e, n, dom_lim):
+def tc_root_eqn(t, llam, w_e, n, dom_lim, damp=0.9):
     Nc = dom_lim + 20
     init_chi = [tf.init_chi(w) for w in tf.freq_array(1, Nc, t)]
     init_zeta = [tf.init_zeta(w) for w in tf.freq_array(1, Nc, t)]
-    mu, zeta, chi = mu_solver(t, llam, w_e, n, init_chi, init_zeta, dom_lim)
+    mu, zeta, chi = mu_solver(t, llam, w_e, n, init_chi, init_zeta, Nc, damp=damp)
     dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
     g = np.sqrt(llam*w_e/2/dos_mu)
     p_matrix = phi_matrix.phi_matrix(t, g, w_e, mu, tf.dee, emin, emax,
@@ -29,10 +29,11 @@ def tc_root_eqn(t, llam, w_e, n, dom_lim):
     return np.linalg.det(p_matrix-np.identity(Nc))
 
 def tc_solver(llam, w_e, n, dom_lim, maxiter=100, p_damp=0.3,
-               iprint=False, tol=1e-5, damp=0.3, p_tol=1e-2,
+               iprint=False, tol=1e-5, damp=0.9, p_tol=1e-2,
                t_tol=5e-2, tc=None,
                ):
-    Nc = dom_lim + 30
+#    print('tc solver')
+    Nc = dom_lim + 20
     l_root = 0.01*w_e
 #    plt.figure(0)
 #    plt.clf
@@ -51,10 +52,11 @@ def tc_solver(llam, w_e, n, dom_lim, maxiter=100, p_damp=0.3,
             llam, w_e, n, dom_lim))
     init_chi = [tf.init_chi(w) for w in tf.freq_array(1, Nc, tc)]
     init_zeta = [tf.init_zeta(w) for w in tf.freq_array(1, Nc, tc)]
-    mu, zeta, chi = mu_solver(tc, llam, w_e, n, init_chi, init_zeta, dom_lim)
+    mu, zeta, chi = mu_solver(tc, llam, w_e, n, init_chi, init_zeta, Nc)
     dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
     g = np.sqrt(llam*w_e/2/dos_mu)
-    p_matrix = phi_matrix.phi_matrix(tc, g, w_e, tf.dee, emin, emax, dos_mu, zeta, dos)
+    p_matrix = phi_matrix.phi_matrix(tc, g, w_e, mu, tf.dee, emin, emax,
+                                     dos_mu, zeta, chi, dos)
     eigvals, eigvects = eig(p_matrix)
     roots = [abs(i-1) for i in eigvals]
     phi_v = eigvects[:, np.argmin(roots)]

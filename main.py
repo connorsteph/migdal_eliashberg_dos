@@ -31,12 +31,13 @@ dom_lim = 25
 p_damp = 0.3
 maxiter = 50
 tol = 1e-5
-damp = 0.3
+damp = 0.9
 
 
-tc, mu, chi, zeta, phi = tc_solver(lam_want, w_e, n, dom_lim, maxiter=maxiter, tol=tol,
-             p_tol=tol, t_tol=5e-2, iprint=False)
-print(tc/w_e)
+tc, mu, chi, zeta, phi = tc_solver(
+        lam_want, w_e, n, dom_lim, maxiter=maxiter,
+        tol=tol, p_tol=tol, t_tol=5e-2, iprint=False, damp=damp)
+print('Tc/we is %g' % (tc/w_e))
 
 
 #plt.figure()
