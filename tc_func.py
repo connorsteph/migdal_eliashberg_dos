@@ -27,6 +27,14 @@ def init_phi(w):
     return 1/w
 
 
+def init_chi(w):
+    return 1/(1+w**2)
+
+
+def init_zeta(w):
+    return w
+
+
 def interpolater(f_domain, f_range):
     """
     given a set of x_i, f(x_i), returns an interpolated function
@@ -168,7 +176,7 @@ def f_compare(v1, v2):
     diff = 0.0
     assert(np.size(v1) == np.size(v2))
     for i in range(np.size(v1)):
-        diff += (v1[i]/v2[i])**2-1
+        diff += abs((v1[i]/v2[i])**2-1)
 #        diff += abs(v1[i]-v2[i])
     return diff/np.size(v1)
 

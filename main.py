@@ -6,42 +6,48 @@ Created on Fri Jun 16 11:40:00 2017
 """
 
 import numpy as np
+from tc_calc import tc_calc
 import tc_func as tf
 from time import time
-from tc_solver import tc_solver
 import matplotlib.pyplot as plt
-
+from tc_solver import tc_solver
 start = time()
 emin = tf.e_min
 emax = tf.e_max
 """
 Problem params
 """
-
-init_phi = tf.init_phi
-
 ttp = tf.ttp
 D = (emax-emin)
 w_e = 16/2.5*tf.ttp
 lam_want = 2*tf.ttp
-mu = 0.0
 n = 1.0
-dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
-g = np.sqrt(lam_want*w_e/2/dos_mu)
 print('Lambda = %g' %lam_want)
 """
 Algorithm params
 """
 
 dom_lim = 50
-damp = 0.3
-iprint=False
-tol=1e-8
-p_damp=0.3,
-maxiter=150
-t_tol=5e-2
-p_tol=1e-2
-plot=False
+p_damp = 0.3
+maxiter = 50
+tol = 1e-5
+damp = 0.9
+
+plt.close('all')
+
+tc, mu, chi, zeta, phi = tc_solver(
+        lam_want, w_e, n, dom_lim, maxiter=maxiter,
+        tol=tol, p_tol=tol, t_tol=5e-2, iprint=False, damp=damp)
+plt.figure()
+plt.plot(phi)
+plt.figure()
+plt.plot(chi)
+plt.figure()
+plt.plot(zeta)
+print('Tc/we is %g' % (tc/w_e))
+print('Mu was %g' % mu)
+
+
 #plt.figure()
 #plt.plot(tf.dos)
 #points = 20
@@ -86,11 +92,4 @@ plot=False
 #plt.figure()
 #plt.plot([1,2,3,4,5], [tc_calc(g, w_e, n, mu, dom_lim, maxiter=maxiter, tol=tol,
 #             p_tol=tol, t_tol=5e-2, plot=False, iprint=False)/w_e for tol in [1e-1, 1e-2, 1e-3, 1e-4, 1e-5]])
-
-tc, phi_v = tc_solver(g, w_e, mu, dos_mu, dom_lim,
-                                      init_phi, maxiter=maxiter, p_damp=p_damp,
-                                      iprint=False, tol=tol, p_tol=p_tol,
-                                      t_tol=t_tol
-                                      )
-print(tc/w_e)
 print('Runtime = %g' % (time() - start))

@@ -1,5 +1,10 @@
+<<<<<<< HEAD
+      subroutine zeta(t, g, w_e, mu, dee, emin, emax, dos_mu,
+     -      damp, dos, old_zeta, chi, new_zeta, nc, nee)
+=======
       subroutine zeta(t, g, w_e, dee, emin, emax, dos_mu,
      -      damp, dos, new_zeta, old_zeta, nc, nee)
+>>>>>>> parent of 39d1bd0... full_problem_no_init_chi
       implicit none
       real*8, intent(in) :: t, g, w_e, dee, emin, emax, damp, dos_mu
       integer, intent(in) :: nc, nee
@@ -20,12 +25,21 @@
       end do
       end subroutine
       
+<<<<<<< HEAD
+      subroutine zeta_init(t, g, w_e, mu, dee, emin,
+     -     emax,  dos_mu, dos, chi, new_zeta, nc, nee)
+=======
       subroutine zeta_init(t, g, w_e, dee, emin,
      -     emax,  dos_mu, dos, new_zeta, nc, nee)
+>>>>>>> parent of 39d1bd0... full_problem_no_init_chi
       implicit none
       real*8, intent(in) :: t, g, w_e, dee, emin, emax, dos_mu
       integer, intent(in) :: nc, nee
       real*8, intent(in) :: dos(0:nee-1)
+<<<<<<< HEAD
+      real*8, intent(in) ::  chi(0:nc-1)
+=======
+>>>>>>> parent of 39d1bd0... full_problem_no_init_chi
       real*8, intent(out) :: new_zeta(0:nc-1)
       integer :: j
       real*8, parameter :: pi = 3.1415926535897

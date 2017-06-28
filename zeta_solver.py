@@ -17,8 +17,9 @@ epsabs = 1e-4
 dos = tf.dos
 
 
-def zeta_solver(t, g, w_e, mu, dos_mu, dom_lim, maxiter=150,
+def zeta_solver(t, g, w_e, mu, dos_mu, chi, init_zeta, dom_lim, maxiter=150,
                 tol=1e-3, iprint=False, damp=0.3):
+#    print('zeta solver')
     """
     attempts to converge the zeta function, from an initial guess
     where zeta(iw_m)=w_m.
@@ -32,20 +33,20 @@ def zeta_solver(t, g, w_e, mu, dos_mu, dom_lim, maxiter=150,
 
     index i of new_zeta is equal to new_zeta evaluated at m=i+1
     """
-    Nc = dom_lim + 20
+#    Nc = dom_lim + 20
     if iprint:
         plt.figure()
         plt.grid(True)
         plt.plot(tf.m_array(1, dom_lim), tf.freq_array(
                 1, dom_lim, t), '.', markersize='2')
     diff_vec = np.empty(maxiter+1)
-    new_zeta = zeta_sum.zeta_init(t, g, w_e, tf.dee, emin, emax,
-                                  dos_mu, dos, Nc, tf.nee)
+    new_zeta = zeta_sum.zeta(t, g, w_e, mu, tf.dee, emin, emax,
+                                  dos_mu, damp, dos, init_zeta, chi)
     if iprint:
         plt.plot(tf.m_array(1, dom_lim),
                  new_zeta[:dom_lim], '--', label='it 0')
 
-    diff_vec[0] = (tf.f_compare(tf.freq_array(1, Nc, t), new_zeta))
+    diff_vec[0] = (tf.f_compare(tf.freq_array(1, dom_lim, t), new_zeta))
 
     """
     we now have a zeta function for the RHS, so we continue to iterate
@@ -55,7 +56,8 @@ def zeta_solver(t, g, w_e, mu, dos_mu, dom_lim, maxiter=150,
     for i in range(1, maxiter+1):
         old_zeta = new_zeta
         new_zeta = zeta_sum.zeta(
-                t, g, w_e, tf.dee, emin, emax, dos_mu, damp, dos, old_zeta, Nc, tf.nee)
+                t, g, w_e, mu, tf.dee, emin, emax,
+                dos_mu, damp, dos, old_zeta, chi)
         diff_vec[i] = (tf.f_compare(old_zeta, new_zeta))
 
         if(np.mod(i, maxiter // 5) == 0):
