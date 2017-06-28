@@ -19,8 +19,8 @@ e_min = -8/ttp-6*abs(ttx)/ttp
 e_max = 8/ttp+6*abs(ttx)/ttp
 cusp = 6*ttx-4*ttx**3/ttp**2
 dos_domain = dos_vals[:, 0]
-dos = dos_vals[:, 1]
-#dos = [1/(e_max-e_min) for i in range(nee)]
+#dos = dos_vals[:, 1]
+dos = [1/(e_max-e_min) for i in range(nee)]
 
 
 def init_phi(w):
@@ -28,7 +28,7 @@ def init_phi(w):
 
 
 def init_chi(w):
-    return 1/w**2
+    return 1/(1+w**2)
 
 
 def init_zeta(w):

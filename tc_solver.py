@@ -11,6 +11,7 @@ from scipy.optimize import brentq
 import tc_func as tf
 from mu_solver import mu_solver
 import phi_matrix
+import matplotlib.pyplot as plt
 
 emax = tf.e_max
 emin = tf.e_min
@@ -22,6 +23,11 @@ def tc_root_eqn(t, llam, w_e, n, dom_lim, damp=0.9):
     init_chi = [tf.init_chi(w) for w in tf.freq_array(1, Nc, t)]
     init_zeta = [tf.init_zeta(w) for w in tf.freq_array(1, Nc, t)]
     mu, zeta, chi = mu_solver(t, llam, w_e, n, init_chi, init_zeta, Nc, damp=damp)
+    plt.figure()
+    plt.plot(chi)
+    plt.show()
+    print(mu)
+    print(tc/w_e)
     dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
     g = np.sqrt(llam*w_e/2/dos_mu)
     p_matrix = phi_matrix.phi_matrix(t, g, w_e, mu, tf.dee, emin, emax,

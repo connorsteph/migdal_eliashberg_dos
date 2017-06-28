@@ -27,17 +27,25 @@ print('Lambda = %g' %lam_want)
 Algorithm params
 """
 
-dom_lim = 25
+dom_lim = 50
 p_damp = 0.3
 maxiter = 50
 tol = 1e-5
 damp = 0.9
 
+plt.close('all')
 
 tc, mu, chi, zeta, phi = tc_solver(
         lam_want, w_e, n, dom_lim, maxiter=maxiter,
         tol=tol, p_tol=tol, t_tol=5e-2, iprint=False, damp=damp)
+plt.figure()
+plt.plot(phi)
+plt.figure()
+plt.plot(chi)
+plt.figure()
+plt.plot(zeta)
 print('Tc/we is %g' % (tc/w_e))
+print('Mu was %g' % mu)
 
 
 #plt.figure()
