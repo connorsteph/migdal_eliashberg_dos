@@ -6,9 +6,9 @@ Created on Fri Jun 16 11:40:00 2017
 """
 
 import numpy as np
-from tc_calc import tc_calc
 import tc_func as tf
 from time import time
+from tc_solver import tc_solver
 import matplotlib.pyplot as plt
 
 start = time()
@@ -17,10 +17,13 @@ emax = tf.e_max
 """
 Problem params
 """
+
+init_phi = tf.init_phi
+
 ttp = tf.ttp
 D = (emax-emin)
 w_e = 16/2.5*tf.ttp
-lam_want = 1*tf.ttp
+lam_want = 2*tf.ttp
 mu = 0.0
 n = 1.0
 dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
@@ -30,12 +33,15 @@ print('Lambda = %g' %lam_want)
 Algorithm params
 """
 
-dom_lim = 25
-p_damp = 0.3
-maxiter = 50
-tol = 1e-5
+dom_lim = 50
 damp = 0.3
-
+iprint=False
+tol=1e-8
+p_damp=0.3,
+maxiter=150
+t_tol=5e-2
+p_tol=1e-2
+plot=False
 #plt.figure()
 #plt.plot(tf.dos)
 #points = 20
@@ -51,26 +57,26 @@ damp = 0.3
 #np.savetxt('bcc_dos_range_lam_1.dat', rrange, delimiter=',')
 #np.savetxt('bcc_dos_domain_lam_1.dat', domain, delimiter=',')
 
-bcc_domain_lam_2 = np.loadtxt('bcc_dos_domain_lam_2.dat', delimiter=',')
-bcc_vals_lam_2 = np.loadtxt('bcc_dos_range_lam_2.dat', delimiter=',')
-const_domain_lam_2 = np.loadtxt('const_dos_domain_lam_2.dat', delimiter=',')
-const_vals_lam_2 = np.loadtxt('const_dos_range_lam_2.dat', delimiter=',')
-const_domain_lam_1 = np.loadtxt('const_dos_domain_lam_1.dat', delimiter=',')
-const_vals_lam_1 = np.loadtxt('const_dos_range_lam_1.dat', delimiter=',')
-bcc_domain_lam_1 = np.loadtxt('bcc_dos_domain_lam_1.dat', delimiter=',')
-bcc_vals_lam_1 = np.loadtxt('bcc_dos_range_lam_1.dat', delimiter=',')
-
-plt.figure()
-plt.grid(True)
-plt.plot(const_domain_lam_2, const_vals_lam_2, '-.', label = 'const_dos_lam_2')
-plt.plot(const_domain_lam_1, const_vals_lam_1, '--', label = 'const_dos_lam_1')
-plt.plot(bcc_domain_lam_2, bcc_vals_lam_2, '-.', label = 'bcc_lam_2')
-plt.plot(bcc_domain_lam_1, bcc_vals_lam_1, '--', label = 'bcc_lam_1')
-plt.xlabel(r'$\frac{\omega_E}{t}$', fontsize=14)
-plt.ylabel(r'$\frac{T_C}{\omega_E}$', fontsize=14)
-plt.legend(loc='best')
-plt.title('Critical Temp. versus Char. Freq. ')
-plt.savefig('tc_vs_w_e_const_and_bcc.pdf', bbox_inches='tight', dpi = 150)
+#bcc_domain_lam_2 = np.loadtxt('bcc_dos_domain_lam_2.dat', delimiter=',')
+#bcc_vals_lam_2 = np.loadtxt('bcc_dos_range_lam_2.dat', delimiter=',')
+#const_domain_lam_2 = np.loadtxt('const_dos_domain_lam_2.dat', delimiter=',')
+#const_vals_lam_2 = np.loadtxt('const_dos_range_lam_2.dat', delimiter=',')
+#const_domain_lam_1 = np.loadtxt('const_dos_domain_lam_1.dat', delimiter=',')
+#const_vals_lam_1 = np.loadtxt('const_dos_range_lam_1.dat', delimiter=',')
+#bcc_domain_lam_1 = np.loadtxt('bcc_dos_domain_lam_1.dat', delimiter=',')
+#bcc_vals_lam_1 = np.loadtxt('bcc_dos_range_lam_1.dat', delimiter=',')
+#
+#plt.figure()
+#plt.grid(True)
+#plt.plot(const_domain_lam_2, const_vals_lam_2, '-.', label = 'const_dos_lam_2')
+#plt.plot(const_domain_lam_1, const_vals_lam_1, '--', label = 'const_dos_lam_1')
+#plt.plot(bcc_domain_lam_2, bcc_vals_lam_2, '-.', label = 'bcc_lam_2')
+#plt.plot(bcc_domain_lam_1, bcc_vals_lam_1, '--', label = 'bcc_lam_1')
+#plt.xlabel(r'$\frac{\omega_E}{t}$', fontsize=14)
+#plt.ylabel(r'$\frac{T_C}{\omega_E}$', fontsize=14)
+#plt.legend(loc='best')
+#plt.title('Critical Temp. versus Char. Freq. ')
+#plt.savefig('tc_vs_w_e_const_and_bcc.pdf', bbox_inches='tight', dpi = 150)
 
 #plt.plot([x/D for x in domain], rrange)
 #plt.xlabel(r'$\frac{\omega_E}{t}$', fontsize=14)
@@ -81,7 +87,10 @@ plt.savefig('tc_vs_w_e_const_and_bcc.pdf', bbox_inches='tight', dpi = 150)
 #plt.plot([1,2,3,4,5], [tc_calc(g, w_e, n, mu, dom_lim, maxiter=maxiter, tol=tol,
 #             p_tol=tol, t_tol=5e-2, plot=False, iprint=False)/w_e for tol in [1e-1, 1e-2, 1e-3, 1e-4, 1e-5]])
 
-#tc = tc_calc(g, w_e, n, mu, dom_lim, maxiter=maxiter, tol=tol,
-#             p_tol=tol, t_tol=5e-2, plot=True, iprint=True)
-#print(tc/w_e)
+tc, phi_v = tc_solver(g, w_e, mu, dos_mu, dom_lim,
+                                      init_phi, maxiter=maxiter, p_damp=p_damp,
+                                      iprint=False, tol=tol, p_tol=p_tol,
+                                      t_tol=t_tol
+                                      )
+print(tc/w_e)
 print('Runtime = %g' % (time() - start))

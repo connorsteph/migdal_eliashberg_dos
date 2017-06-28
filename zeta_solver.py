@@ -32,14 +32,13 @@ def zeta_solver(t, g, w_e, mu, dos_mu, dom_lim, maxiter=150,
 
     index i of new_zeta is equal to new_zeta evaluated at m=i+1
     """
-    Nc = dom_lim + 30
+    Nc = dom_lim + 20
     if iprint:
         plt.figure()
         plt.grid(True)
         plt.plot(tf.m_array(1, dom_lim), tf.freq_array(
                 1, dom_lim, t), '.', markersize='2')
     diff_vec = np.empty(maxiter+1)
-    new_zeta = np.zeros(Nc)
     new_zeta = zeta_sum.zeta_init(t, g, w_e, tf.dee, emin, emax,
                                   dos_mu, dos, Nc, tf.nee)
     if iprint:
