@@ -35,15 +35,15 @@ def zeta_solver(t, g, w_e, mu, dos_mu, chi, init_zeta, dom_lim, maxiter=150,
     """
 #    Nc = dom_lim + 20
     if iprint:
-        plt.figure()
+        f, (ax1, ax2) = plt.subplots(1, 2)
         plt.grid(True)
-        plt.plot(tf.m_array(1, dom_lim), tf.freq_array(
+        ax1.plot(tf.m_array(1, dom_lim), tf.freq_array(
                 1, dom_lim, t), '.', markersize='2')
     diff_vec = np.empty(maxiter+1)
-    new_zeta = zeta_sum.zeta(t, g, w_e, mu, tf.dee, emin, emax,
-                                  dos_mu, damp, dos, init_zeta, chi)
+    new_zeta = zeta_sum.zeta(t, g, w_e, mu, dos_mu, tf.dee, emin, emax,
+                             damp, dos, init_zeta, chi)
     if iprint:
-        plt.plot(tf.m_array(1, dom_lim),
+        ax1.plot(tf.m_array(1, dom_lim),
                  new_zeta[:dom_lim], '--', label='it 0')
 
     diff_vec[0] = (tf.f_compare(tf.freq_array(1, dom_lim, t), new_zeta))
@@ -56,19 +56,19 @@ def zeta_solver(t, g, w_e, mu, dos_mu, chi, init_zeta, dom_lim, maxiter=150,
     for i in range(1, maxiter+1):
         old_zeta = new_zeta
         new_zeta = zeta_sum.zeta(
-                t, g, w_e, mu, tf.dee, emin, emax,
-                dos_mu, damp, dos, old_zeta, chi)
+                    t, g, w_e, mu, dos_mu, tf.dee, emin, emax,
+                    damp, dos, old_zeta, chi)
         diff_vec[i] = (tf.f_compare(old_zeta, new_zeta))
 
         if(np.mod(i, maxiter // 5) == 0):
             if iprint:
-                print('Difference in iteration %i is ' % i, diff_vec[i])
-                plt.plot(tf.m_array(1, dom_lim), new_zeta[:dom_lim], '-.',
+#                print('Difference in iteration %i is ' % i, diff_vec[i])
+                ax1.plot(tf.m_array(1, dom_lim), new_zeta[:dom_lim], '-.',
                          label='it %i' % i)
         if (diff_vec[i] < tol):
             if iprint:
-                print('zeta converged to tol in %i iterations' % i)
-                plt.plot(tf.m_array(1, dom_lim), new_zeta[:dom_lim], '-.',
+#                print('zeta converged to tol in %i iterations' % i)
+                ax1.plot(tf.m_array(1, dom_lim), new_zeta[:dom_lim], '-.',
                          label='it %i' % i)
                 diff_vec = diff_vec[:i+1]
             break
@@ -79,18 +79,15 @@ def zeta_solver(t, g, w_e, mu, dos_mu, chi, init_zeta, dom_lim, maxiter=150,
 
     if iprint:
         print('last difference: ', diff_vec[-1])
-        plt.legend(loc='best')
-        plt.title('Zeta fnc. Damping = %2.2f' % damp)
-        plt.savefig('zeta_func.pdf', bbox_inches='tight')
-        plt.ylabel('Zeta(m)')
-        plt.xlabel('m')
-        plt.show()
+        ax1.legend(loc='best')
+        ax1.set_title('Zeta fnc. Damping = %2.2f\n mu = %3.2g, T/w_e = %g' % (damp, mu, t/w_e))
+        ax1.set_ylabel(r'$\zeta_m$', fontsize=18)
+        ax1.set_xlabel('m')
 
-        plt.figure()
-        plt.plot(np.log(diff_vec), 'o', markersize=2)
-        plt.xlabel('Iteration n')
-        plt.ylabel('Log Diff')
-        plt.title('Log difference in iterated fnc. Damping =%2.2f' % damp)
+        ax2.plot(np.log10(diff_vec), '-o', markersize=2)
+        ax2.set_xlabel('Iteration n')
+        ax2.set_title('Log difference')
+        f.savefig('zeta_func.pdf', bbox_inches='tight')
         plt.show()
 #    zeta = tf.interpolater(tf.freq_array(1, dom_lim, t), new_zeta[:dom_lim])
 #    return zeta, new_zeta[:dom_lim]

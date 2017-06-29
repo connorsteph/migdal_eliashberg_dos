@@ -4,12 +4,12 @@ Created on Fri Jun 16 11:40:00 2017
 
 @author: Connor
 """
-
+import mu_zeta_chi
 import numpy as np
-from tc_calc import tc_calc
 import tc_func as tf
 from time import time
 import matplotlib.pyplot as plt
+from mu_solver import mu_solver
 from tc_solver import tc_solver
 start = time()
 emin = tf.e_min
@@ -19,7 +19,7 @@ Problem params
 """
 ttp = tf.ttp
 D = (emax-emin)
-w_e = 16/2.5*tf.ttp
+w_e = D/2.5*tf.ttp
 lam_want = 2*tf.ttp
 n = 1.0
 print('Lambda = %g' %lam_want)
@@ -27,69 +27,56 @@ print('Lambda = %g' %lam_want)
 Algorithm params
 """
 
-dom_lim = 50
-p_damp = 0.3
-maxiter = 50
-tol = 1e-5
-damp = 0.9
+dom_lim = 60
+maxiter = 150
+tol = 1e-3
 
 plt.close('all')
-
+#********************************************************
+#Nc = dom_lim+30
+#damp = 0.1
+#mu = 5.
+#dos = tf.dos
+#dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
+#g = np.sqrt(lam_want*w_e/2/dos_mu)
+#t = 1.0*w_e
+#init_chi = [tf.init_chi(w) for w in tf.freq_array(1, dom_lim, t)]
+#init_zeta = [tf.init_zeta(w) for w in tf.freq_array(1, dom_lim, t)]
+#zeta, chi, iterations = mu_zeta_chi.simult_mu_func(t,g,w_e,mu,dos_mu,emin,emax,tf.dee,damp,
+#                                           maxiter,tol,tf.dos,init_zeta,init_chi)
+#plt.figure()
+#plt.plot(zeta)
+#plt.figure()
+#plt.plot(chi)
+#print(iterations)
+#************************************************************
 tc, mu, chi, zeta, phi = tc_solver(
         lam_want, w_e, n, dom_lim, maxiter=maxiter,
-        tol=tol, p_tol=tol, t_tol=5e-2, iprint=False, damp=damp)
+        tol=tol, p_tol=tol, iprint=False)
+
 plt.figure()
 plt.plot(phi)
+plt.title('phi')
 plt.figure()
 plt.plot(chi)
+plt.title('chi')
 plt.figure()
 plt.plot(zeta)
+plt.title('zeta')
+print('n is %g' % n)
+print('w_e is %g' % w_e)
+print('Mu is %g' % mu)
 print('Tc/we is %g' % (tc/w_e))
-print('Mu was %g' % mu)
 
-
+#******************************************
+#tc = 0.01*w_e
+#init_chi = [tf.init_chi(w) for w in tf.freq_array(1, dom_lim, tc)]
+#init_zeta = [tf.init_zeta(w) for w in tf.freq_array(1, dom_lim, tc)]
+#mu, zeta, chi = mu_solver(tc, lam_want, w_e, n, init_chi, init_zeta,
+#                          dom_lim, maxiter=maxiter, tol=tol)
+#print(mu)
 #plt.figure()
-#plt.plot(tf.dos)
-#points = 20
-#domain = np.linspace(0.01*ttp, 1.0*ttp, points)
-#rrange = np.empty(points)
-#for c, w in enumerate(domain):
-#    g = np.sqrt(lam_want*w/2/dos_mu)
-##    inner_start = time()
-##    print((c+1)/points, w/D)
-#    rrange[c] = tc_calc(g, w, n, mu, dom_lim)/w
-##    print('tc is ', rrange[c]/w)
-##    print(time() - inner_start)
-#np.savetxt('bcc_dos_range_lam_1.dat', rrange, delimiter=',')
-#np.savetxt('bcc_dos_domain_lam_1.dat', domain, delimiter=',')
-
-#bcc_domain_lam_2 = np.loadtxt('bcc_dos_domain_lam_2.dat', delimiter=',')
-#bcc_vals_lam_2 = np.loadtxt('bcc_dos_range_lam_2.dat', delimiter=',')
-#const_domain_lam_2 = np.loadtxt('const_dos_domain_lam_2.dat', delimiter=',')
-#const_vals_lam_2 = np.loadtxt('const_dos_range_lam_2.dat', delimiter=',')
-#const_domain_lam_1 = np.loadtxt('const_dos_domain_lam_1.dat', delimiter=',')
-#const_vals_lam_1 = np.loadtxt('const_dos_range_lam_1.dat', delimiter=',')
-#bcc_domain_lam_1 = np.loadtxt('bcc_dos_domain_lam_1.dat', delimiter=',')
-#bcc_vals_lam_1 = np.loadtxt('bcc_dos_range_lam_1.dat', delimiter=',')
-#
+#plt.plot(zeta)
 #plt.figure()
-#plt.grid(True)
-#plt.plot(const_domain_lam_2, const_vals_lam_2, '-.', label = 'const_dos_lam_2')
-#plt.plot(const_domain_lam_1, const_vals_lam_1, '--', label = 'const_dos_lam_1')
-#plt.plot(bcc_domain_lam_2, bcc_vals_lam_2, '-.', label = 'bcc_lam_2')
-#plt.plot(bcc_domain_lam_1, bcc_vals_lam_1, '--', label = 'bcc_lam_1')
-#plt.xlabel(r'$\frac{\omega_E}{t}$', fontsize=14)
-#plt.ylabel(r'$\frac{T_C}{\omega_E}$', fontsize=14)
-#plt.legend(loc='best')
-#plt.title('Critical Temp. versus Char. Freq. ')
-#plt.savefig('tc_vs_w_e_const_and_bcc.pdf', bbox_inches='tight', dpi = 150)
-
-#plt.plot([x/D for x in domain], rrange)
-#plt.xlabel(r'$\frac{\omega_E}{t}$', fontsize=14)
-#plt.ylabel(r'$\frac{T_C}{\omega_E}$', fontsize=14)
-#plt.title('Critical Temp. versus Char. Freq. for Const. DOS 1/D')
-#plt.savefig('tc_vs_w_e_lam_2_const_dos_dee_5d-2.pdf', bbox_inches='tight', dpi = 300)
-#plt.figure()
-#plt.plot([1,2,3,4,5], [tc_calc(g, w_e, n, mu, dom_lim, maxiter=maxiter, tol=tol,
-#             p_tol=tol, t_tol=5e-2, plot=False, iprint=False)/w_e for tol in [1e-1, 1e-2, 1e-3, 1e-4, 1e-5]])
+#plt.plot(chi)
 print('Runtime = %g' % (time() - start))
