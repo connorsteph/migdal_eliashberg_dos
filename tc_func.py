@@ -10,7 +10,7 @@ import numpy as np
 important to have a data file with ttx and ttp data in the two column format
 """
 
-data = np.loadtxt('ttx_0d0_nx_500_dee_5d-2.dat', skiprows=1, usecols=[0, 1])
+data = np.loadtxt('./dat_files/ttx_0d0_nx_500_dee_5d-2.dat', skiprows=1, usecols=[0, 1])
 dos_vals = data[1:, :]
 [ttp, ttx] = data[0, :]
 dee = dos_vals[1, 0] - dos_vals[0, 0]
@@ -28,7 +28,7 @@ def init_phi(w):
 
 
 def init_chi(w):
-    return 1/(1+w**2)
+    return 1/(5+w**2)
 
 
 def init_zeta(w):
@@ -176,7 +176,7 @@ def f_compare(v1, v2):
     diff = 0.0
     assert(np.size(v1) == np.size(v2))
     for i in range(np.size(v1)):
-        diff += abs((v1[i]/v2[i])**2-1)
+        diff += abs((v1[i]/v2[i])-1)
 #        diff += abs(v1[i]-v2[i])
     return diff/np.size(v1)
 

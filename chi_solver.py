@@ -26,8 +26,8 @@ def chi_solver(t, g, w_e, mu, dos_mu, init_chi, zeta, Nc, maxiter=150,
        ax1.plot(tf.m_array(1, Nc),
             init_chi, '.', markersize='2', label='initial')
     diff_vec = np.empty(maxiter+1)
-    new_chi = chi_sum.chi(t, g, w_e, mu, tf.dee, emin, emax,
-                          dos_mu, damp, dos, zeta, init_chi, Nc, tf.nee)
+    new_chi = chi_sum.chi(t, g, w_e, mu, dos_mu, tf.dee, emin, emax,
+                          damp, dos, zeta, init_chi, Nc, tf.nee)
     if iprint:
         ax1.plot(tf.m_array(1, Nc),
                  new_chi[:Nc], '--', label='it 0')
@@ -41,17 +41,17 @@ def chi_solver(t, g, w_e, mu, dos_mu, init_chi, zeta, Nc, maxiter=150,
     for i in range(1, maxiter+1):
         old_chi = new_chi
         new_chi = chi_sum.chi(
-                t, g, w_e, mu, tf.dee, emin, emax, dos_mu, damp,
+                t, g, w_e, mu, dos_mu, tf.dee, emin, emax, damp,
                 dos, zeta, old_chi, Nc, tf.nee)
         diff_vec[i] = (tf.f_compare(old_chi, new_chi))
         if(np.mod(i, maxiter // 5) == 0):
             if iprint:
-                print('Difference in iteration %i is ' % i, diff_vec[i])
+#                print('Difference in iteration %i is ' % i, diff_vec[i])
                 ax1.plot(tf.m_array(1, Nc), new_chi[:Nc], '-.',
                          label='it %i' % i)
         if (diff_vec[i] < tol):
             if iprint:
-                print('chi converged to tol in %i iterations' % i)
+#                print('chi converged to tol in %i iterations' % i)
                 ax1.plot(tf.m_array(1, Nc), new_chi[:Nc], '-.',
                          label='it %i' % i)
 
@@ -66,14 +66,15 @@ def chi_solver(t, g, w_e, mu, dos_mu, init_chi, zeta, Nc, maxiter=150,
 
     if iprint:
 
-        print('last difference: ', diff_vec[-1])
+#        print('last difference: ', diff_vec[-1])
 #        plt.legend(loc='best')
-        ax1.set_title('Chi fnc. Damping = %2.2f\n mu = %3.2g, T/w_e = %g' % (damp,mu,t/w_e))
+        ax1.set_title('Chi fnc. Damping = %2.2f\n w_e = %g, mu = %3.2g, T/w_e = %g' % (damp, w_e,
+                                                                                      mu,t/w_e))
         ax1.set_ylabel(r'$\chi_m$',fontsize=18)
         ax1.set_xlabel('m')
         ax1.legend(loc='best')
 
-        ax2.plot(np.log(diff_vec[:-1]), '-o', markersize=2)
+        ax2.plot(np.log10(diff_vec[:-2]), '-o', markersize=2)
         ax2.set_xlabel('Iteration n')
         ax2.set_title('Log difference')
         f.savefig('chi_func.pdf', bbox_inches='tight')
