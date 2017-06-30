@@ -1,0 +1,7 @@
+ttp      =	1.0
+ttx      =	0.0
+dee      =	0.005
+del      =	0.01
+nx       =	500
+verbose  =	0
+outfile  =	ttx_0d0_nx_500_dee_5d-3.dat

@@ -5,7 +5,7 @@ Created on Mon Jun 26 12:16:36 2017
 @author: Connor
 """
 import numpy as np
-from numpy import sqrt
+#from numpy import sqrt
 import tc_func as tf
 #from zeta_solver import zeta_solver
 #from chi_solver import chi_solver
@@ -18,6 +18,7 @@ emin = tf.e_min
 epsrel = 1e-4
 epsabs = 1e-4
 dos = tf.dos
+dos_avg = tf.dos_avg
 """
 given tc, lambda, w_e, and n, calculates a self consistent mu,
 chi, and zeta.
@@ -30,27 +31,27 @@ def mu_root_eqn(mu, t, llam, w_e, n, init_chi,
     if np.sign(mu) < 0:
         for c, val in enumerate(init_chi):
             init_chi[c] = -val
-    dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
-    g = sqrt(llam*w_e/2/dos_mu)
-    zeta, chi, _ = mu_zeta_chi.simult_mu_func(t,g,w_e,mu,dos_mu,emin,emax,tf.dee,damp,
+    zeta, chi, iterations = mu_zeta_chi.simult_mu_func(t,llam,w_e,mu,dos_avg,emin,emax,tf.dee,damp,
                                            maxiter,tol,dos,init_zeta,init_chi)
 #    print(n)
-    return n - n_sum.n_occ(t, g, w_e, tf.dee, emin, emax, mu, dos,
+    if iterations < 0:
+        print('slow convergence, damp = %g, mu = %g, t/w_e = %g' % (damp,mu,t/w_e))
+    return n - n_sum.n_occ(t, w_e, tf.dee, emin, emax, mu, dos,
                        zeta, chi)
-#    return mu_zeta_chi.mu_root_eqn(t,g,w_e,tf.dee,emin,emax,mu,dos_mu,n,maxiter,
+#    return mu_zeta_chi.mu_root_eqn(t,llam,w_e,tf.dee,emin,emax,mu,dos_avg,n,maxiter,
 #                                   damp,tol,dos,init_zeta,init_chi)
 
 
 #    new_chi = chi_solver(
-#            t, g, w_e, mu, dos_mu, init_chi, init_zeta, Nc,
+#            t, llam, w_e, mu, dos_mu, init_chi, init_zeta, Nc,
 #            maxiter=100, damp = damp, iprint=True)
-#    new_zeta = zeta_solver(t, g, w_e, mu,  dos_mu, new_chi,
+#    new_zeta = zeta_solver(t, llam, w_e, mu,  dos_avg, new_chi,
 #                           init_zeta, Nc, iprint=False)
 #
 #    for i in range(1,maxiter+1):
 #        old_zeta = new_zeta
 #        old_chi = new_chi
-#        new_zeta = zeta_solver(t, g, w_e, mu, dos_mu, old_chi,
+#        new_zeta = zeta_solver(t, llam, w_e, mu, dos_mu, old_chi,
 #                               old_zeta,  Nc, iprint=False)
 #        new_chi = chi_solver(t, g, w_e, mu, dos_mu, old_chi,
 #                             new_zeta, Nc, damp = damp,
@@ -70,27 +71,26 @@ def mu_root_eqn(mu, t, llam, w_e, n, init_chi,
 
 def mu_solver(t, llam, w_e, n, init_chi, init_zeta, Nc, tol=1e-3,
               maxiter=150, damp = 0.9, iprint=False):
-    cutoff = 0.0
-#    print('flag1')
+    print('T/w_e = %g' % (t/w_e))
+    print('n = %g' % n )
+    cutoff = 2.0
 #    num = 10
 #    mu_domain = np.linspace(emin+cutoff, emax-cutoff, num)
 #    y = np.zeros(num)
 #    for c, mu in enumerate(mu_domain, 0):
 #        y[c] = (mu_root_eqn(mu, t, llam, w_e, n, init_chi,
-#         init_zeta, Nc, damp, maxiter))
+#         init_zeta, Nc, damp, maxiter))+n
 #    plt.figure()
+#    plt.plot(mu_domain, [n*i for i in np.ones(num)])
 #    plt.plot(mu_domain, y, 'o-')
 #    plt.xlabel('mu')
 #    plt.show()
     mu = brentq(mu_root_eqn, emin+cutoff, emax-cutoff, args=(
-            t, llam, w_e, n, init_chi, init_zeta, Nc, damp, maxiter), xtol=1e-5)
-#    print('flag2')
-    dos_mu = tf.interpolater(tf.dos_domain, tf.dos)(mu)
-    g = sqrt(llam*w_e/2/dos_mu)
-    zeta, chi, _ = mu_zeta_chi.simult_mu_func(t,g,w_e,mu,dos_mu,emin,emax,tf.dee,damp,
-                                           maxiter,tol,dos,init_zeta,init_chi)
-#    print(t/w_e)
-
-
+            t, llam, w_e, n, init_chi, init_zeta,
+            Nc, damp, maxiter), xtol=1e-5)
+    zeta, chi, _ = mu_zeta_chi.simult_mu_func(
+            t,llam,w_e,mu,dos_avg,emin,emax,tf.dee,damp,
+            maxiter,tol,dos,init_zeta,init_chi)
+    z = [zeta[i]/tf.freq_m(i, t) for i in tf.m_array(1, len(zeta)-1)]
     #print('mu is %g' % mu)
-    return mu, zeta, chi
+    return mu, zeta, chi, z

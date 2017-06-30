@@ -17,10 +17,11 @@ dee = dos_vals[1, 0] - dos_vals[0, 0]
 nee = np.size(dos_vals[:, 0])
 e_min = -8/ttp-6*abs(ttx)/ttp
 e_max = 8/ttp+6*abs(ttx)/ttp
+dos_avg = 1/(e_max-e_min)
 cusp = 6*ttx-4*ttx**3/ttp**2
 dos_domain = dos_vals[:, 0]
-#dos = dos_vals[:, 1]
-dos = [1/(e_max-e_min) for i in range(nee)]
+dos = dos_vals[:, 1]
+#dos = [1/(e_max-e_min) for i in range(nee)]
 
 
 def init_phi(w):
