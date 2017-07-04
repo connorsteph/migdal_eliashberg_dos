@@ -43,9 +43,9 @@ def tc_solver(llam, w_e, n, dom_lim, maxiter=150, p_damp=0.3,
                ):
 #    print('tc solver')
     Nc = dom_lim + 20
-    min_bound = 0.1*w_e
+    min_bound = 0.07*w_e
     max_bound = 0.9*w_e
-#    num = 10
+#    num = 3
 #    t_domain = np.linspace(min_bound, max_bound, num)
 #    y = np.zeros(num)
 #    for c, t in enumerate(t_domain, 0):

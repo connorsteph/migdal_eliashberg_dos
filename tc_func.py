@@ -8,6 +8,7 @@ import numpy as np
 
 """
 important to have a data file with ttx and ttp data in the two column format
+ (use the compiled program with BCC config file)
 """
 
 data = np.loadtxt('./dat_files/ttx_0d0_nx_500_dee_5d-2.dat', skiprows=1, usecols=[0, 1])
@@ -78,22 +79,6 @@ def binsearch(vec, val):
     return ia
 
 
-#def ek(z, y, x, rho):
-#    # bcc NNN dispersion
-#    return -8*(np.cos(x)*np.cos(y)*np.cos(z))
-#    -rho*2*(np.cos(x) + np.cos(y) + np.cos(z))
-#
-#
-#def f(x, t):
-#    # fermi distr.
-#    return 1/(1+np.exp(x/t))
-#
-#
-#def n(x, t):
-#    # bose einstein distr.
-#    return 1/(np.exp(x/t) - 1)
-
-
 #def dos(e):
 #    # interpolates the DOS from a given file
 ##    if isinstance(e, (list, tuple, np.ndarray)):
@@ -131,29 +116,6 @@ def matsu_index(w, t):
     return round(1/2*(w/np.pi/t+1))
 
 
-#def matsu_sum(lower, upper, t, f, *args):
-#    ssum = 0.0
-#    """
-#    returns the sum over fermion matsubara freq. (m = lower to upper)
-#    of func. f, with arguments given by
-#    **kwargs, at temperature t
-#    """
-#    for n in range(lower, upper+1, 1):
-#        ssum += f(np.pi*t*(2*n-1), n, *args)
-#    return ssum
-#
-#
-#def matsu_sym(lim, t, f, *args):
-#    """
-#    returns the symmetric sum over fermion matsubara freq.
-#    (from m = 1 to lim) of func. f,
-#    with arguments given by **kwargs, at temperature t
-#    """
-#
-#    sum_range = [f(w, *args) for w in freq_array(-lim, lim, t)]
-#    return sum(sum_range)
-
-
 def freq_array(lower, upper, t):
     """
     returns matsubara frequencies m= lower to upper
@@ -180,23 +142,3 @@ def f_compare(v1, v2):
         diff += abs((v1[i]/v2[i])-1)
 #        diff += abs(v1[i]-v2[i])
     return diff/np.size(v1)
-
-
-#def lam_even(w_e, w_m, w_n):
-#    """
-#    even phonon kernel with imaginary freq. arguments, without
-#    mass enhancement param. (folded)
-#    """
-#    return w_e**2*(1/(w_e**2+(w_m-w_n)**2)+1/(w_e**2+(w_m+w_n)**2))
-#
-#
-#def lam_odd(w_e, w_m, w_n):
-#    """
-#    odd phonon kernel with imaginary freq. arguments, without
-#    mass enhancement param. (folded)
-#    """
-#    return w_e**2*(1/(w_e**2+(w_m-w_n)**2)-1/(w_e**2+(w_m+w_n)**2))
-#
-#
-#def lam_full(w_e, w_m, w_n):
-#    return w_e**2/(w_e**2+(w_m-w_n)**2)
