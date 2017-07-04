@@ -22,11 +22,11 @@ ttp = tf.ttp
 D = (emax-emin)
 w_e = 1*tf.ttp
 lam_want = 2*tf.ttp
-n = 0.15
+n = 1.2
 """
 Algorithm params
 """
-dom_lim = 150
+dom_lim = 50
 maxiter = 150
 tol = 1e-3
 damp = 0.2
@@ -49,45 +49,45 @@ plt.close('all')
 #plt.plot(chi)
 #print(iterations)
 #************************************************************
-num = 30
-n_domain = np.linspace(0.15, 1.0, num)
-y = np.empty(num)
-for c, i in enumerate(n_domain):
-    print('%g%%' % ((c+1)/num*100))
-    y[c] = tc_solver(
-        lam_want, w_e, i, dom_lim, maxiter=maxiter,
-        tol=tol, p_tol=tol, iprint=False)[0]
-    y[c] = y[c]/w_e
-    np.savetxt('./dat_files/bcc_NN_t_vs_n_2017_06_30_n_0_15_to_1_steps_30.dat', y)
-np.savetxt('./dat_files/bcc_NN_t_vs_n_2017_06_30_n_0_15_to_1_steps_30.dat', y)
-plt.figure()
-plt.grid(True)
-plt.plot(n_domain, y)
-plt.xlabel(r'$n$', fontsize=14)
-plt.xlim([0,1.0])
-plt.ylim([0,0.5])
-plt.ylabel(r'$\frac{T_c}{\omega_E}$', fontsize=14)
-plt.title('Tc versus filling for BCC DOS (NN)\n w_e = %g, lam = %g' % (w_e, lam_want))
-plt.savefig('./plots/tc_vs_n_bcc_dos_ttx_0.pdf', dpi=150, bbox_inches='tight')
+#num = 30
+#n_domain = np.linspace(0.15, 1.0, num)
+#y = np.empty(num)
+#for c, i in enumerate(n_domain):
+#    print('%g%%' % ((c+1)/num*100))
+#    y[c] = tc_solver(
+#        lam_want, w_e, i, dom_lim, maxiter=maxiter,
+#        tol=tol, p_tol=tol, iprint=False)[0]
+#    y[c] = y[c]/w_e
+#    np.savetxt('./dat_files/bcc_NN_t_vs_n_2017_06_30_n_0_15_to_1_steps_30.dat', y)
+#np.savetxt('./dat_files/bcc_NN_t_vs_n_2017_06_30_n_0_15_to_1_steps_30.dat', y)
+#plt.figure()
+#plt.grid(True)
+#plt.plot(n_domain, y)
+#plt.xlabel(r'$n$', fontsize=14)
+#plt.xlim([0,1.0])
+#plt.ylim([0,0.5])
+#plt.ylabel(r'$\frac{T_c}{\omega_E}$', fontsize=14)
+#plt.title('Tc versus filling for BCC DOS (NN)\n w_e = %g, lam = %g' % (w_e, lam_want))
+#plt.savefig('./plots/tc_vs_n_bcc_dos_ttx_0.pdf', dpi=150, bbox_inches='tight')
 #************************************************************
-#tc, mu, chi, zeta, phi, z = tc_solver(
-#        lam_want, w_e, n, dom_lim, maxiter=maxiter,
-#        tol=tol, p_tol=tol, iprint=False)
-#
-#plt.figure()
-#plt.plot(phi)
-#plt.title('phi')
-#plt.figure()
-#plt.plot(chi)
-#plt.title('chi')
-#plt.figure()
-#plt.plot(zeta)
-#plt.title('zeta')
-#print('\n********************************\nLambda = %g' %lam_want)
-#print('n is %g' % n)
-#print('w_e is %g' % w_e)
-#print('Mu is %g' % mu)
-#print('Tc/we is %g' % (tc/w_e))
+tc, mu, chi, zeta, phi, z = tc_solver(
+        lam_want, w_e, n, dom_lim, maxiter=maxiter,
+        tol=tol, p_tol=tol, iprint=False)
+
+plt.figure()
+plt.plot(phi)
+plt.title('phi')
+plt.figure()
+plt.plot(chi)
+plt.title('chi')
+plt.figure()
+plt.plot(zeta)
+plt.title('zeta')
+print('\n********************************\nLambda = %g' %lam_want)
+print('n is %g' % n)
+print('w_e is %g' % w_e)
+print('Mu is %g' % mu)
+print('Tc/we is %g' % (tc/w_e))
 #******************************************
 #tc = 0.9*w_e
 #y=[]
@@ -101,15 +101,4 @@ plt.savefig('./plots/tc_vs_n_bcc_dos_ttx_0.pdf', dpi=150, bbox_inches='tight')
 #plt.figure()
 #plt.grid(True)
 #plt.plot(np.arange(0,0.99,0.05),y)
-
-#init_chi = [tf.init_chi(w) for w in tf.freq_array(1, dom_lim, tc)]
-#init_zeta = [tf.init_zeta(w) for w in tf.freq_array(1, dom_lim, tc)]
-#mu, zeta, chi, z = mu_solver(tc, lam_want, w_e, n, init_chi, init_zeta,
-#                          dom_lim, maxiter=maxiter, tol=tol, damp=damp)
-#print(mu)
-#plt.figure()
-#plt.plot(z)
-#plt.figure()
-#plt.plot(chi)
-#plt.ylim([-3,3])
 print('Runtime = %g' % (time() - start))

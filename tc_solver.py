@@ -21,19 +21,10 @@ dos = tf.dos
 dos_avg = tf.dos_avg
 
 def tc_root_eqn(t, llam, w_e, n, Nc, maxiter, damp=0.6):
-
-#    t_samp.append(t)
-#    print(t/w_e)
     init_chi = [tf.init_chi(w) for w in tf.freq_array(1, Nc, t)]
     init_zeta = [tf.init_zeta(w) for w in tf.freq_array(1, Nc, t)]
-#    print('flag0')
     mu, zeta, chi, z = mu_solver(t, llam, w_e, n, init_chi, init_zeta,
                               Nc, maxiter=maxiter, damp=damp)
-#    plt.figure()
-#    plt.plot(chi)
-#    plt.show()
-#    print(mu)
-#    print(t/w_e)
     p_matrix = phi_matrix.phi_matrix(t, llam, w_e, mu, dos_avg, tf.dee, emin, emax,
                                      zeta, chi, dos)
     return np.linalg.det(p_matrix-np.identity(Nc))
@@ -41,7 +32,6 @@ def tc_root_eqn(t, llam, w_e, n, Nc, maxiter, damp=0.6):
 def tc_solver(llam, w_e, n, dom_lim, maxiter=150, p_damp=0.3,
                iprint=False, tol=1e-5, damp=0.6, p_tol=1e-2, tc=None,
                ):
-#    print('tc solver')
     Nc = dom_lim + 20
     min_bound = 0.07*w_e
     max_bound = 0.9*w_e

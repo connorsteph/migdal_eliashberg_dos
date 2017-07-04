@@ -1,29 +1,30 @@
-      subroutine zeta(t, g, w_e, mu, dos_mu, dee, emin, emax,
+      subroutine zeta(t, lambda, w_e, mu, dos_mu, dee, emin, emax,
      -      damp, dos, old_zeta, chi, new_zeta, nc, nee)
       implicit none
-      real*8, intent(in) :: t, g, w_e, dee, emin, emax, damp, mu, dos_mu
+      real*8, intent(in) :: t, w_e, dee, emin, emax, damp, mu, dos_mu,
+     -     lambda
       integer, intent(in) :: nc, nee
       real*8, intent(in) :: dos(0:nee-1)
       real*8, intent(in) :: old_zeta(0:nc-1), chi(0:nc-1)
       real*8, intent(out) :: new_zeta(0:nc-1)
       integer :: j
       real*8, parameter :: pi = 3.1415926535897
-      real*8 :: matsu_sum, lambda, w_m
+      real*8 :: matsu_sum, w_m
       external :: zeta_sum
-      lambda = 2*dos_mu*g**2/w_e
       do j = 0,nc-1
          w_m = pi*t*(2*(j+1)-1)
-         call zeta_sum(t, g, w_e, w_m, mu, dos, dee,
+         call zeta_sum(t, w_e, w_m, mu, dos, dee,
      -        emin, emax, old_zeta, chi, matsu_sum, nc, nee)
          new_zeta(j) = (1-damp)*(w_m + lambda/dos_mu*t*pi*matsu_sum)
      -        + damp*old_zeta(j)
       end do
       end subroutine
 
-      subroutine zeta_sum(t, g, w_e, w_m, mu, dos, dee,
+      subroutine zeta_sum(t, w_e, w_m, mu, dos, dee,
      - emin, emax, old_zeta, chi, ssum, nc, nee)
       implicit none
-      real*8, intent(in) :: t, g, w_e, w_m, dee, emin, emax, mu
+      real*8, intent(in) :: t, w_e, w_m, dee, emin, emax,
+     -     mu
       integer, intent(in) :: nc, nee
       real*8, intent(in) :: old_zeta(0:nc-1), chi(0:nc-1)
       real*8, intent(in) :: dos(0:nee-1)       
