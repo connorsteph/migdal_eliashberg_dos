@@ -1,0 +1,4 @@
+ext_suffix := $(shell python3-config --extension-suffix)
+
+%$(ext_suffix): %.f90
+	f2py3n

@@ -10,51 +10,37 @@ from scipy.linalg import eig
 from scipy.optimize import brentq
 import tc_func as tf
 from mu_solver import mu_solver
-import phi_matrix
-import matplotlib.pyplot as plt
+from omp_phi_matrix import phi_mat
 
 emax = tf.e_max
 emin = tf.e_min
-epsrel = 1e-4
-epsabs = 1e-4
 dos = tf.dos
 dos_avg = tf.dos_avg
 
-def tc_root_eqn(t, llam, w_e, n, Nc, maxiter, damp=0.6):
-    init_chi = [tf.init_chi(w) for w in tf.freq_array(1, Nc, t)]
-    init_zeta = [tf.init_zeta(w) for w in tf.freq_array(1, Nc, t)]
-    mu, zeta, chi, z = mu_solver(t, llam, w_e, n, init_chi, init_zeta,
-                              Nc, maxiter=maxiter, damp=damp)
-    p_matrix = phi_matrix.phi_matrix(t, llam, w_e, mu, dos_avg, tf.dee, emin, emax,
-                                     zeta, chi, dos)
-    return np.linalg.det(p_matrix-np.identity(Nc))
+def tc_root_eqn(t,  llam, w_e, n, Nc, maxiter, damp, tol):
+    mu, zeta, chi, z = mu_solver(t, llam, w_e, n, Nc, maxiter=maxiter,
+                                 damp=damp, tol=1e-8)
+    print('First index of chi:', chi[0])
+    p_matrix = phi_mat.phi_matrix(t, llam, w_e, mu, dos_avg, tf.dee, emin,
+                                      zeta, chi, dos, tf.q_list, tf.p_list)
+    print(p_matrix)
+    val = np.linalg.det(p_matrix - np.identity(Nc))
+    print(val, t/w_e)
+    return val
 
-def tc_solver(llam, w_e, n, dom_lim, maxiter=150, p_damp=0.3,
-               iprint=False, tol=1e-5, damp=0.6, p_tol=1e-2, tc=None,
-               ):
-    Nc = dom_lim + 20
-    min_bound = 0.07*w_e
-    max_bound = 0.9*w_e
-#    num = 3
-#    t_domain = np.linspace(min_bound, max_bound, num)
-#    y = np.zeros(num)
-#    for c, t in enumerate(t_domain, 0):
-#        y[c] = (tc_root_eqn(t, llam, w_e, n, dom_lim, maxiter))
-#    plt.figure()
-#    plt.grid(True)
-#    plt.plot([t/w_e for t in t_domain], y, 'o-',label = 'w_e = %5.4g' % w_e)
-#    plt.xlabel('t')
-#    plt.legend(loc = 'best')
-#    plt.show()
+def tc_solver(llam, w_e, n, dom_lim, maxiter=150,
+              mu_tol=1e-5, damp=0.2):
+    print("Solving for tc")
+    Nc = dom_lim
+    min_bound = 0.1 * w_e
+    max_bound = 0.3 * w_e
     tc = brentq(tc_root_eqn, min_bound, max_bound, args=(
-            llam, w_e, n, Nc, maxiter), xtol=1e-2)
-    init_chi = [tf.init_chi(w) for w in tf.freq_array(1, Nc, tc)]
-    init_zeta = [tf.init_zeta(w) for w in tf.freq_array(1, Nc, tc)]
-    mu, zeta, chi, z = mu_solver(tc, llam, w_e, n, init_chi, init_zeta, Nc)
-    p_matrix = phi_matrix.phi_matrix(tc, llam, w_e, mu, dos_avg, tf.dee, emin, emax,
-                                      zeta, chi, dos)
+        llam, w_e, n, Nc, maxiter, damp, mu_tol), xtol=1e-10)
+    mu, zeta, chi, z = mu_solver(tc, llam, w_e, n, Nc, maxiter=maxiter, damp=damp, tol=1e-8)
+    p_matrix = phi_mat.phi_matrix(tc, llam, w_e, mu, dos_avg, tf.dee, emin,
+                                     zeta, chi, dos, tf.q_list, tf.p_list)
     eigvals, eigvects = eig(p_matrix)
-    roots = [abs(i-1) for i in eigvals]
+    roots = [abs(i - 1) for i in eigvals]
     phi_v = eigvects[:, np.argmin(roots)]
-    phi = np.copy([p/phi_v[0] for p in phi_v])
-    return [tc, mu, chi[:], zeta[:], phi[:], z[:]]
+    phi = np.copy([p / phi_v[0] for p in phi_v])
+    return [tc, mu, chi[:dom_lim], zeta[:dom_lim], phi[:dom_lim], z[:dom_lim]]

@@ -1,104 +1,89 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Jun 16 11:40:00 2017
-
+#
 @author: Connor
 """
 #import mu_zeta_chi
+#import phi_matrix
 import numpy as np
 import tc_func as tf
 from time import time
-import matplotlib.pyplot as plt
-from mu_solver import mu_solver
+from time import strftime
 from tc_solver import tc_solver
 start = time()
 emin = tf.e_min
 emax = tf.e_max
 dos_avg = tf.dos_avg
+
 """
 Problem params
 """
+
 ttp = tf.ttp
 D = (emax-emin)
-w_e = 1*tf.ttp
-lam_want = 2*tf.ttp
-n = 1.2
-"""
-Algorithm params
-"""
-dom_lim = 50
-maxiter = 150
-tol = 1e-3
-damp = 0.2
-#0.17 for const_dos
-#0.2 for bcc_dos
-plt.close('all')
-#********************************************************
-#Nc = dom_lim+30
-#damp = 0.1
-#mu = 5.
-#dos = tf.dos
-#t = 1.0*w_e
-#init_chi = [tf.init_chi(w) for w in tf.freq_array(1, dom_lim, t)]
-#init_zeta = [tf.init_zeta(w) for w in tf.freq_array(1, dom_lim, t)]
-#zeta, chi, iterations = mu_zeta_chi.simult_mu_func(t,lam_want,w_e,mu,tf.dos_avg,emin,emax,tf.dee,damp,
-#                                           maxiter,tol,tf.dos,init_zeta,init_chi)
-#plt.figure()
-#plt.plot(zeta)
-#plt.figure()
-#plt.plot(chi)
-#print(iterations)
-#************************************************************
-#num = 30
-#n_domain = np.linspace(0.15, 1.0, num)
-#y = np.empty(num)
-#for c, i in enumerate(n_domain):
-#    print('%g%%' % ((c+1)/num*100))
-#    y[c] = tc_solver(
-#        lam_want, w_e, i, dom_lim, maxiter=maxiter,
-#        tol=tol, p_tol=tol, iprint=False)[0]
-#    y[c] = y[c]/w_e
-#    np.savetxt('./dat_files/bcc_NN_t_vs_n_2017_06_30_n_0_15_to_1_steps_30.dat', y)
-#np.savetxt('./dat_files/bcc_NN_t_vs_n_2017_06_30_n_0_15_to_1_steps_30.dat', y)
-#plt.figure()
-#plt.grid(True)
-#plt.plot(n_domain, y)
-#plt.xlabel(r'$n$', fontsize=14)
-#plt.xlim([0,1.0])
-#plt.ylim([0,0.5])
-#plt.ylabel(r'$\frac{T_c}{\omega_E}$', fontsize=14)
-#plt.title('Tc versus filling for BCC DOS (NN)\n w_e = %g, lam = %g' % (w_e, lam_want))
-#plt.savefig('./plots/tc_vs_n_bcc_dos_ttx_0.pdf', dpi=150, bbox_inches='tight')
-#************************************************************
-tc, mu, chi, zeta, phi, z = tc_solver(
-        lam_want, w_e, n, dom_lim, maxiter=maxiter,
-        tol=tol, p_tol=tol, iprint=False)
 
-plt.figure()
-plt.plot(phi)
-plt.title('phi')
-plt.figure()
-plt.plot(chi)
-plt.title('chi')
-plt.figure()
-plt.plot(zeta)
-plt.title('zeta')
-print('\n********************************\nLambda = %g' %lam_want)
-print('n is %g' % n)
-print('w_e is %g' % w_e)
-print('Mu is %g' % mu)
-print('Tc/we is %g' % (tc/w_e))
-#******************************************
-#tc = 0.9*w_e
-#y=[]
-#for damp in np.arange(0,0.99,0.05):
-#    init_chi = [tf.init_chi(w) for w in tf.freq_array(1, dom_lim, tc)]
-#    init_zeta = [tf.init_zeta(w) for w in tf.freq_array(1, dom_lim, tc)]
-#    start2 = time()
-#    mu, zeta, chi, z = mu_solver(tc, lam_want, w_e, n, init_chi, init_zeta,
-#                          dom_lim, maxiter=maxiter, tol=tol, damp=damp)
-#    y.append(time()-start2)
-#plt.figure()
-#plt.grid(True)
-#plt.plot(np.arange(0,0.99,0.05),y)
+"""
+other params
+"""
+
+suffix = ''
+dos_type = 'NN'
+directory = './dat_files/'
+date = strftime("%Y_%m_%d")
+
+w_e = 1.0
+lam_want = 0.25*tf.ttp
+dom_lim = 75
+num  = 15
+n_lower = 0.9
+n_upper = 1.0
+tol = 1e-5
+damp = 0.1
+maxiter = 200
+n = 1.0
+# n_domain = np.linspace(n_lower, n_upper, num)
+# tc_over_w = np.zeros(num)
+# mu = np.zeros(num)
+# chi_array = np.zeros([dom_lim, num])
+# zeta_array = np.zeros([dom_lim, num])
+# phi_array = np.zeros([dom_lim, num])
+# z_array = np.zeros([dom_lim, num])
+
+# np.savetxt((directory + dos_type + '_tc_vs_n_' + date + '_n_' +  str(n_lower) +  '_to_' +  str(n_upper) + 
+#             '_steps_' +  str(num)  + '_tc_vals_lam_' + str(lam_want) + '_we_' + str(w_e) + '_dom_lim_' + 
+#             str(dom_lim)  + '_tol_' +  str(tol) + '.dat'), tc_over_w)
+
+# for c, n in enumerate(n_domain):
+#    print('%g%%' % ((c+1)/num*100))
+#    print('n = %g' % n_domain[c])
+#    [tc_over_w[c], mu[c], chi_array[:, c], zeta_array[:, c],
+#     phi_array[:, c], z_array[:,c]] = tc_solver(
+#         lam_want, w_e, n, dom_lim, maxiter=maxiter,
+#         mu_tol=tol, damp=damp, iprint=False)
+#    tc_over_w[c] = tc_over_w[c]/w_e
+
+#    np.savetxt((directory + dos_type + '_tc_vs_n_' + date + '_n_' +  str(n_lower) +  '_to_' +  str(n_upper) + 
+#                '_steps_' +  str(num)  + '_tc_vals_lam_' + str(lam_want) + '_we_' + str(w_e) + '_dom_lim_' + 
+#                str(dom_lim)  + '_tol_' +  str(tol) + '.dat'), tc_over_w)
+#    np.savetxt((directory + dos_type + '_tc_vs_n_' + date + '_n_' +  str(n_lower) +  '_to_' +  str(n_upper) + 
+#                '_steps_' +  str(num)  + '_n_domain_lam_' + str(lam_want) + '_we_' + str(w_e) + '_dom_lim_' + 
+#                str(dom_lim)  + '_tol_' +  str(tol) + '.dat'), n_domain)
+#    np.savetxt((directory + dos_type + '_tc_vs_n_' + date + '_n_' +  str(n_lower) +  '_to_' +  str(n_upper) + 
+#                '_steps_' +  str(num)  + '_mu_lam_' + str(lam_want) + '_we_' + str(w_e) + '_dom_lim_' +
+#                str(dom_lim)  + '_tol_' +  str(tol) + '.dat'), mu)
+#    np.savetxt((directory + dos_type + '_tc_vs_n_' + date + '_n_' +  str(n_lower) +  '_to_' +  str(n_upper) + 
+#                '_steps_' +  str(num)  + '_chi_lam_' + str(lam_want) + '_we_' + str(w_e) + '_dom_lim_' +
+#                str(dom_lim)  + '_tol_' +  str(tol) + '.dat'), chi_array)
+#    np.savetxt((directory + dos_type + '_tc_vs_n_' + date + '_n_' +  str(n_lower) +  '_to_' +  str(n_upper) + 
+#                '_steps_' +  str(num)  + '_phi_lam_' + str(lam_want) + '_we_' + str(w_e) + '_dom_lim_' +
+#                str(dom_lim)  + '_tol_' +  str(tol) + '.dat'), phi_array)
+#    np.savetxt((directory + dos_type + '_tc_vs_n_' + date + '_n_' +  str(n_lower) +  '_to_' +  str(n_upper) + 
+#                '_steps_' +  str(num)  + '_z_lam_' + str(lam_want) + '_we_' + str(w_e) + '_dom_lim_' +
+#                str(dom_lim)  + '_tol_' +  str(tol) + '.dat'), z_array) 
+print("Lambda %g w_e %g n %g dom_lim %g" %(lam_want, w_e, n, dom_lim))
+print(tc_solver(
+      lam_want, w_e, n, dom_lim, maxiter=maxiter, mu_tol = tol, damp=damp)[0]/w_e)
+
 print('Runtime = %g' % (time() - start))
+print('*************************************')
